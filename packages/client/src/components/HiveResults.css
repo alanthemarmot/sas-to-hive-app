@@ -1,0 +1,73 @@
+.hive-results {
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.hive-results-header {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hive-results-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.hive-results-close:hover {
+  color: var(--text-primary);
+}
+
+.hive-results-message {
+  font-size: 12px;
+  color: var(--success);
+  padding: 6px 12px;
+}
+
+.results-table-container {
+  max-height: 200px;
+  overflow: auto;
+  padding: 0 12px 12px;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.results-table th {
+  background: var(--bg-tertiary);
+  padding: 6px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  color: var(--text-primary);
+}
+
+.results-table td {
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-table tr:nth-child(even) {
+  background: var(--row-even-bg);
+}
+
+.results-table tr:hover {
+  background: var(--row-hover-bg);
+}

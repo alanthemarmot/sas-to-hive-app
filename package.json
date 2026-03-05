@@ -1,0 +1,19 @@
+{
+  "name": "sas-to-hive-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SAS to HiveQL translation web app (POC)",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --workspace=packages/server",
+    "dev:client": "npm run dev --workspace=packages/client",
+    "build": "npm run build --workspace=packages/client",
+    "start": "npm run start --workspace=packages/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
