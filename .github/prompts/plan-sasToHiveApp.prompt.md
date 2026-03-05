@@ -10,6 +10,38 @@ A Node.js (Express) + React (Vite) monorepo that lets users paste, upload, or br
 
 ---
 
+## ✅ Completed Features
+
+### Light/Dark Mode Toggle
+**Status:** Complete (5 Mar 2026)
+
+- **Implementation:**
+  - Added 16 CSS custom properties to `index.css`: 11 colour tokens + 5 theme-aware rgba/transparency variables (dark theme baseline + `[data-theme="light"]` override block with VS Code Light+ palette)
+  - Toggle button in app header (top-right) displays ☀️ when dark mode active, 🌙 when light mode active
+  - Theme state managed in `App.tsx` with `localStorage` persistence (key: `sas-hive-theme`)
+  - `useEffect` hook applies `data-theme` attribute to `document.documentElement` on mount and when theme changes
+  - Monaco Editor theme (both SAS/Hive editors) switches between `vs-dark` and `light` via theme prop
+  - All hardcoded `rgba(255,255,255,...)` values in component CSS replaced with theme-aware variables
+
+- **Files modified:**
+  - `packages/client/src/index.css` — Added light theme override block + 5 new CSS variables
+  - `packages/client/src/App.tsx` — Added theme state, localStorage sync, toggle handler, button JSX
+  - `packages/client/src/App.css` — Added `.theme-toggle` button styles
+  - `packages/client/src/components/TranslationView.tsx` — Added `theme` prop, Monaco theme mapping
+  - `packages/client/src/components/FileTree.css` — Replaced rgba hover value with `--hover-bg` variable
+  - `packages/client/src/components/HiveResults.css` — Replaced rgba row values with theme variables
+  - `packages/client/src/components/Toolbar.css` — Replaced spinner rgba values with theme variables
+  - `packages/client/src/components/FileUpload.css` — Replaced dragover rgba with `--dragover-bg` variable
+
+- **Verification:**
+  - ✅ Toggle in header switches entire app theme (sidebar, toolbar, editors, panels, tables)
+  - ✅ Theme persists across page refresh via localStorage
+  - ✅ Light mode: no visibility issues (spinner, hover states, table rows all readable)
+  - ✅ Monaco editor CSS class (light theme) renders with proper syntax highlighting
+  - ✅ No TypeScript or build errors
+
+---
+
 ## Steps
 
 ### 1. Scaffold the monorepo
@@ -90,10 +122,10 @@ Apply the visual identity of [Revenue.ie](https://www.revenue.ie) throughout the
 - Background: `--rc-primary`; text/icon: `--rc-text-on-primary`.
 - Sticky positioning so it remains visible when the editor panels scroll.
 
-#### 7c. Favicon & page title
-- Replace the default Vite favicon with the Revenue harp icon (`public/favicon.ico` + `public/favicon.svg`).
-- Update `<title>` in `packages/client/index.html` to **"SAS to HiveQL | Revenue"**.
-- Add `<meta name="theme-color">` set to `--rc-primary` hex value for mobile browser chrome.
+#### 7c. Favicon & page title ✅ (5 Mar 2026 — placeholder)
+- Added `public/favicon.svg` — blue rounded square with "S→H" monospace text (placeholder; replace with Revenue harp SVG when asset is available).
+- Updated `<title>` in `packages/client/index.html` to **"SAS to HiveQL | Revenue"**.
+- Added `<meta name="theme-color" content="#0078d4">` (placeholder accent; update to `--rc-primary` hex when brand colours are confirmed).
 
 #### 7d. Component re-skin
 Apply brand tokens to all existing components:
@@ -132,7 +164,8 @@ Apply brand tokens to all existing components:
 - **Output actions:** Copy to clipboard works, download produces a `.hql` file, Execute shows mock results.
 - **Streaming:** Hive output appears token-by-token (not all at once after a long wait).
 - **Edge cases:** Submit empty input → friendly error. Submit non-SAS code → model flags it. Submit very large file → model returns partial with a warning.
-- **Branding:** Header displays Revenue harp logo and correct wordmark. Favicon shown in browser tab. All buttons, panels, and sidebar use Revenue colour tokens. Monaco editor theme matches palette. Contrast ratios pass WCAG 2.1 AA.
+- **Theme toggle:** Click sun/moon button in header → entire app switches theme instantly. Refresh page → persisted theme is restored. Light mode: hover states, spinners, table row striping all visible. Monaco editor CSS class updates correctly.
+- **Branding (future):** Header displays Revenue harp logo and correct wordmark. Favicon shown in browser tab. All buttons, panels, and sidebar use Revenue colour tokens. Monaco editor theme matches palette. Contrast ratios pass WCAG 2.1 AA.
 
 ## Decisions
 
@@ -144,5 +177,165 @@ Apply brand tokens to all existing components:
 | **Auth** | None | Internal POC only; add when moving toward production |
 | **Hive execution** | Mock endpoint for now | Real JDBC proxy is a config change when Cloudera is available |
 | **Streaming** | SSE from Express → real-time token output | Much better UX for large translations |
+| **Theme support** | CSS custom properties (`[data-theme]` attribute) + localStorage | Centralised colour definitions; theme preference persists; Monaco editor theme follows system/user preference |
 | **Branding** | CSS custom properties (tokens) + single `Header` component | Centralises all brand values so swapping colours later is a one-file change; avoids hard-coding in every component |
 | **Brand colours** | Placeholder tokens until values confirmed | Implementation can proceed structurally; colours slotted in once provided |
+
+---
+
+## Feature Development with Git Worktrees
+
+Each of the six planned features is specced in its own prompt file under `.github/prompts/`. They are developed and tested in **isolated git worktrees** — separate working directories that share the same repository history. This means each feature can be built, run, and reviewed concurrently without branches interfering with each other, and without stashing or committing half-finished work.
+
+### Feature Branches & Prompt Files
+
+| # | Branch | Prompt file | Port (server / client) |
+|---|--------|-------------|------------------------|
+| 1 | `feature/conversational-followup` | `plan-feature-1-conversational-followup.prompt.md` | 3011 / 5181 |
+| 2 | `feature/pattern-library` | `plan-feature-2-pattern-library.prompt.md` | 3012 / 5182 |
+| 3 | `feature/confidence-scoring` | `plan-feature-3-confidence-scoring.prompt.md` | 3013 / 5183 |
+| 4 | `feature/line-mapping` | `plan-feature-4-line-mapping.prompt.md` | 3014 / 5184 |
+| 5 | `feature/dialect-selector` | `plan-feature-5-dialect-selector.prompt.md` | 3015 / 5185 |
+| 6 | `feature/domain-context` | `plan-feature-6-domain-context.prompt.md` | 3016 / 5186 |
+
+Each worktree runs on its own dedicated port pair so all six can be live simultaneously without conflicts.
+
+---
+
+### One-Time Setup
+
+Run once from the repository root to create all six worktrees and their branches:
+
+```bash
+# From: /Users/alan/Documents/workspace/sas-to-hive-app
+
+git worktree add ../sas-hive-feat-1 -b feature/conversational-followup
+git worktree add ../sas-hive-feat-2 -b feature/pattern-library
+git worktree add ../sas-hive-feat-3 -b feature/confidence-scoring
+git worktree add ../sas-hive-feat-4 -b feature/line-mapping
+git worktree add ../sas-hive-feat-5 -b feature/dialect-selector
+git worktree add ../sas-hive-feat-6 -b feature/domain-context
+```
+
+This creates six sibling directories next to the main workspace:
+
+```
+Documents/workspace/
+├── sas-to-hive-app/          ← main / trunk
+├── sas-hive-feat-1/          ← feature/conversational-followup
+├── sas-hive-feat-2/          ← feature/pattern-library
+├── sas-hive-feat-3/          ← feature/confidence-scoring
+├── sas-hive-feat-4/          ← feature/line-mapping
+├── sas-hive-feat-5/          ← feature/dialect-selector
+└── sas-hive-feat-6/          ← feature/domain-context
+```
+
+Each worktree is a full working copy — open any of them in VS Code as a separate workspace window, or use VS Code's **File → Add Folder to Workspace** to view them in a single multi-root workspace.
+
+---
+
+### Port Configuration
+
+Each worktree needs its own port pair to avoid conflicts. Create a `.env` file in each worktree root:
+
+**`../sas-hive-feat-1/.env`**
+```
+GITHUB_PAT=github_pat_xxxxx
+PORT=3011
+VITE_PORT=5181
+```
+
+Repeat with the port numbers from the table above for features 2–6. The `GITHUB_PAT` value is the same for all worktrees.
+
+To make Vite respect `VITE_PORT`, update `packages/client/vite.config.ts` in each worktree (or do this once on `main` before creating the worktrees):
+
+```typescript
+export default defineConfig({
+  server: {
+    port: Number(process.env.VITE_PORT ?? 5173),
+    proxy: {
+      '/api': `http://localhost:${process.env.PORT ?? 3001}`,
+    },
+  },
+});
+```
+
+---
+
+### Per-Feature Workflow
+
+For each feature (replace `N` and `feat-N` with the feature number):
+
+```bash
+# 1. Install dependencies (node_modules are not shared across worktrees)
+cd ../sas-hive-feat-N
+npm install
+
+# 2. Start the dev servers
+npm run dev
+# Server: http://localhost:301N
+# Client: http://localhost:518N
+
+# 3. Open the feature plan for reference
+# .github/prompts/plan-feature-N-<name>.prompt.md
+
+# 4. Implement the feature per the plan
+# ... make changes ...
+
+# 5. Type-check before committing
+npx -w packages/server tsc --noEmit
+npx -w packages/client tsc --noEmit
+
+# 6. Commit work on the feature branch
+git add -A && git commit -m "feat: <description>"
+```
+
+---
+
+### Merging Completed Features Back to Main
+
+Once a feature is reviewed and accepted, merge it into `main` from the main workspace:
+
+```bash
+cd /Users/alan/Documents/workspace/sas-to-hive-app   # main worktree
+
+# Option A — fast-forward if no divergence
+git merge feature/conversational-followup
+
+# Option B — squash merge for a clean history
+git merge --squash feature/conversational-followup
+git commit -m "feat: conversational follow-up chat panel"
+```
+
+After merging, remove the worktree and delete the branch:
+
+```bash
+git worktree remove ../sas-hive-feat-1
+git branch -d feature/conversational-followup
+```
+
+---
+
+### Listing & Inspecting Worktrees
+
+```bash
+# Show all worktrees and their current branches/commits
+git worktree list
+
+# Typical output:
+# /Users/alan/Documents/workspace/sas-to-hive-app   abc1234 [main]
+# /Users/alan/Documents/workspace/sas-hive-feat-1   abc1234 [feature/conversational-followup]
+# /Users/alan/Documents/workspace/sas-hive-feat-2   abc1234 [feature/pattern-library]
+# ...
+```
+
+---
+
+### Notes & Gotchas
+
+- **`node_modules` are not shared** — run `npm install` in each worktree after creation. This is expected; each worktree is fully independent.
+- **`.env` files are not tracked by git** — copy or recreate `.env` in each worktree. They will not be present after `git worktree add`.
+- **You cannot check out the same branch in two worktrees simultaneously** — git enforces this. If you try, you'll get a `fatal: branch is already checked out` error. Use a different branch name per worktree.
+- **VS Code workspaces** — open each worktree as a separate VS Code window (`code ../sas-hive-feat-N`) to get independent terminal sessions, debug configurations, and extension states.
+- **Shared git history** — all worktrees read from and write to the same `.git` directory in the main workspace. `git log`, `git fetch`, and `git push` work identically in any worktree.
+- **Rebasing before merge** — if `main` has advanced since the worktree was created (e.g. multiple features merging in parallel), rebase the feature branch before merging to avoid conflicts: `git rebase main` from within the worktree.
