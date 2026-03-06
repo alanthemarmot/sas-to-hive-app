@@ -77,20 +77,38 @@
 
 .sidebar {
   width: 260px;
+  min-width: 180px;
+  max-width: 600px;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   flex-shrink: 0;
-  transition: width 0.2s ease, opacity 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .sidebar--collapsed {
-  width: 0;
+  width: 0 !important;
+  min-width: 0;
   overflow: hidden;
   opacity: 0;
   border-right: none;
+}
+
+.sidebar-resize-handle {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle:active {
+  background: var(--accent);
+  opacity: 0.4;
 }
 
 .main-content {

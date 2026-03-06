@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { streamTranslation, executeHiveQuery } from './api/client';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
+import ViewModeBar, { type ViewMode } from './components/ViewModeBar';
 import ExplanationPanel from './components/ExplanationPanel';
 import HiveResults from './components/HiveResults';
 import FileTree from './components/FileTree';
@@ -27,7 +28,38 @@ export default function App() {
   const [showExplanation, setShowExplanation] = useState(true);
   const [showHiveResults, setShowHiveResults] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const isDragging = useRef(false);
+
+  const handleResizeStart = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  const handleResizeMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    const newWidth = Math.min(Math.max(e.clientX, 180), 600);
+    setSidebarWidth(newWidth);
+  }, []);
+
+  const handleResizeEnd = useCallback(() => {
+    isDragging.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, []);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const stored = localStorage.getItem('sas-hive-view-mode');
+    return stored === 'sas' || stored === 'dual' || stored === 'hive' ? stored : 'dual';
+  });
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('sas-hive-view-mode', mode);
+  }, []);
 
   const addToast = useCallback((type: 'success' | 'error', message: string) => {
     const id = `${Date.now()}`;
@@ -160,10 +192,22 @@ export default function App() {
         <span className="app-subtitle">Revenue Commissioners</span>
       </header>
       <div className="app-body">
-        <aside className={`sidebar${sidebarOpen ? '' : ' sidebar--collapsed'}`}>
+        <aside
+          className={`sidebar${sidebarOpen ? '' : ' sidebar--collapsed'}`}
+          style={sidebarOpen ? { width: sidebarWidth } : undefined}
+        >
           <FileTree onFileSelect={(content) => setSasCode(content)} />
           <FileUpload onFileLoaded={(content) => setSasCode(content)} onToast={addToast} />
         </aside>
+        {sidebarOpen && (
+          <div
+            className="sidebar-resize-handle"
+            onPointerDown={handleResizeStart}
+            onPointerMove={handleResizeMove}
+            onPointerUp={handleResizeEnd}
+            aria-hidden="true"
+          />
+        )}
         <main id="main-content" className="main-content">
           <Toolbar
             onTranslate={handleTranslate}
@@ -175,12 +219,14 @@ export default function App() {
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
           />
+          <ViewModeBar viewMode={viewMode} onViewModeChange={handleViewModeChange} />
           <TranslationView
             sasCode={sasCode}
             onSasCodeChange={setSasCode}
             hiveSQL={hiveSQL}
             isTranslating={isTranslating}
             error={error}
+            viewMode={viewMode}
           />
           {showExplanation && explanation && (
             <ExplanationPanel

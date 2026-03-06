@@ -9,6 +9,16 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editor-panel--dominant {
+  flex: 4;
+}
+
+.editor-panel--recessive {
+  flex: 1;
+  min-width: 160px;
 }
 
 .editor-panel + .editor-panel {
