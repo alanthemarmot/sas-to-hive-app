@@ -11,7 +11,6 @@ interface ChatPanelProps {
   sasCode: string;
   hiveSQL: string;
   explanation: string;
-  theme: 'dark' | 'light';
   isVisible: boolean;
   onClose: () => void;
   selectedModel?: string;

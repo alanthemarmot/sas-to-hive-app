@@ -202,7 +202,6 @@ export default function App() {
             sasCode={sasCode}
             hiveSQL={hiveSQL}
             explanation={explanation}
-            theme={theme}
             isVisible={showChat}
             onClose={() => setShowChat(false)}
             selectedModel={selectedModel}
