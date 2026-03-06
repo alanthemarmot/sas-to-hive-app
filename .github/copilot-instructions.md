@@ -1,5 +1,15 @@
 # AI Agent Instructions: SAS-to-Hive Translation App
 
+## Project Plan & Status
+
+The authoritative plan for this project — including completed features, current status, the prototype test phase, and the six planned feature branches — is maintained at:
+
+**[`.github/prompts/plan-sasToHiveApp.prompt.md`](.github/prompts/plan-sasToHiveApp.prompt.md)**
+
+**Always read this file at the start of any session** to understand what has been built, what is in progress, and what the next priorities are. Each of the six planned features also has its own spec file in `.github/prompts/plan-feature-N-*.prompt.md`.
+
+---
+
 ## Architecture Overview
 
 **Monorepo structure** (npm workspaces):
