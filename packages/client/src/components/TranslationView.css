@@ -4,6 +4,28 @@
   overflow: hidden;
 }
 
+.translation-view--no-mappings {
+  /* default: 2-column, handled by flex: 1 on editor-panel */
+}
+
+/* Monaco decoration styles */
+.mapping-gutter-marker {
+  background: #005a5c;
+  width: 3px !important;
+  margin-left: 3px;
+  border-radius: 2px;
+}
+
+.mapping-active-sas {
+  background: rgba(255, 193, 44, 0.15);
+  border-left: 3px solid #ffc12c;
+}
+
+.mapping-active-hive {
+  background: rgba(0, 90, 92, 0.12);
+  border-left: 3px solid #005a5c;
+}
+
 .editor-panel {
   flex: 1;
   display: flex;

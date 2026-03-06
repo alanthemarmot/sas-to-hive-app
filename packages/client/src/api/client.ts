@@ -5,6 +5,17 @@ export interface FileNode {
   children?: FileNode[];
 }
 
+export interface LineMapping {
+  id: string;
+  sasLines: number[];
+  hiveLines: number[];
+  explanation: string;
+}
+
+export interface TranslationMappings {
+  mappings: LineMapping[];
+}
+
 const API_BASE = '/api';
 
 export async function translateSasToHive(

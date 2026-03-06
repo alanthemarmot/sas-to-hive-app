@@ -78,7 +78,25 @@ Translate the provided SAS code into equivalent HiveQL. First, briefly explain w
 - Do NOT guess at translations you are unsure of — flag them with WARNING comments
 - Preserve the logical intent of the code, not just the syntax
 - Use CTEs liberally to improve readability
-- All created tables should use \`STORED AS ORC\` unless the source specifies otherwise`;
+- All created tables should use \`STORED AS ORC\` unless the source specifies otherwise
+
+## Line Mapping
+After the \`\`\`sql code block, provide a line mapping as a \`\`\`json block:
+
+\`\`\`json
+{
+  "mappings": [
+    {
+      "id": "string",
+      "sasLines": [1, 2],
+      "hiveLines": [3, 4, 5],
+      "explanation": "string"
+    }
+  ]
+}
+\`\`\`
+
+Include one mapping entry per logical SAS construct (e.g. one for PROC SORT, one for each SELECT clause, one for each BY group). Aim for 3-8 mappings per translation. Each id should be a short kebab-case identifier (e.g. "proc-sort", "select-clause"). The explanation should be written for a non-technical SAS user: avoid Hive jargon and explain what the Hive construct achieves in SAS terms.`;
 
 export function buildTranslationPrompt(sasCode: string): ChatMessage[] {
   return [
@@ -93,9 +111,25 @@ export function buildTranslationPrompt(sasCode: string): ChatMessage[] {
   ];
 }
 
-export function parseTranslationResponse(response: string): { hiveSQL: string; explanation: string } {
+export interface LineMapping {
+  id: string;
+  sasLines: number[];
+  hiveLines: number[];
+  explanation: string;
+}
+
+export interface TranslationMappings {
+  mappings: LineMapping[];
+}
+
+export function parseTranslationResponse(response: string): {
+  hiveSQL: string;
+  explanation: string;
+  mappings: TranslationMappings | null;
+} {
   let explanation = '';
   let hiveSQL = '';
+  let mappings: TranslationMappings | null = null;
 
   // Extract explanation from markers
   const explanationMatch = response.match(
@@ -136,5 +170,17 @@ export function parseTranslationResponse(response: string): { hiveSQL: string; e
     }
   }
 
-  return { hiveSQL, explanation };
+  // Extract mapping JSON block
+  const jsonBlocks = [...response.matchAll(/```json\s*\n([\s\S]*?)```/g)];
+  for (const block of jsonBlocks) {
+    try {
+      const parsed = JSON.parse(block[1]);
+      if (Array.isArray(parsed.mappings)) {
+        mappings = parsed as TranslationMappings;
+        break;
+      }
+    } catch { /* ignore malformed JSON */ }
+  }
+
+  return { hiveSQL, explanation, mappings };
 }

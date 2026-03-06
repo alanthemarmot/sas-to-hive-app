@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { streamTranslation, executeHiveQuery } from './api/client';
+import type { TranslationMappings } from './api/client';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
 import ExplanationPanel from './components/ExplanationPanel';
@@ -28,6 +29,8 @@ export default function App() {
   const [showHiveResults, setShowHiveResults] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [mappings, setMappings] = useState<TranslationMappings | null>(null);
+  const [activeMappingId, setActiveMappingId] = useState<string | null>(null);
 
   const addToast = useCallback((type: 'success' | 'error', message: string) => {
     const id = `${Date.now()}`;
@@ -45,6 +48,8 @@ export default function App() {
     setExplanation('');
     setError(null);
     setHiveResults(null);
+    setMappings(null);
+    setActiveMappingId(null);
 
     try {
       let fullOutput = '';
@@ -81,6 +86,18 @@ export default function App() {
         const sqlMatch = rawSQL.match(/```sql\s*([\s\S]*?)```/);
         setHiveSQL(sqlMatch ? sqlMatch[1].trim() : rawSQL);
         setShowExplanation(true);
+
+        // Extract mapping JSON
+        const jsonBlocks = [...fullOutput.matchAll(/```json\s*\n([\s\S]*?)```/g)];
+        for (const block of jsonBlocks) {
+          try {
+            const parsed = JSON.parse(block[1]);
+            if (Array.isArray(parsed.mappings)) {
+              setMappings(parsed as TranslationMappings);
+              break;
+            }
+          } catch { /* ignore */ }
+        }
       } else {
         setHiveSQL(fullOutput.trim());
       }
@@ -181,6 +198,9 @@ export default function App() {
             hiveSQL={hiveSQL}
             isTranslating={isTranslating}
             error={error}
+            mappings={mappings}
+            activeMappingId={activeMappingId}
+            onMappingActivate={setActiveMappingId}
           />
           {showExplanation && explanation && (
             <ExplanationPanel
