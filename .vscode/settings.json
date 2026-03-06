@@ -3,6 +3,13 @@
         "npm install": true,
         "npx tsc": true,
         "npx -w packages/client": true,
-        "lsof": true
+        "lsof": true,
+        "git worktree": true,
+        "npx -w packages/server": true,
+        "/^python3 - << 'PYEOF'\ncontent = \"\"\"import \\{ defineConfig, loadEnv \\} from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig\\(\\(\\{ mode \\}\\) => \\{\n  // Load \\.env from the workspace root \\(two levels up from packages/client/\\)\n  const env = loadEnv\\(mode, '\\.\\./\\.\\./', ''\\);\n  const clientPort = parseInt\\(env\\.VITE_PORT \\|\\| '5173', 10\\);\n  const serverPort = parseInt\\(env\\.PORT \\|\\| '3001', 10\\);\n\n  return \\{\n    plugins: \\[react\\(\\)\\],\n    server: \\{\n      port: clientPort,\n      proxy: \\{\n        '/api': \\{\n          target: `http://localhost:\\$\\{serverPort\\}`,\n          changeOrigin: true,\n        \\},\n      \\},\n    \\},\n  \\};\n\\}\\);\n\"\"\"\nbase = \"/Users/alan/Documents/workspace/sas-to-hive-app/\\.trees/feat-\\{\\}/packages/client/vite\\.config\\.ts\"\nfor i in range\\(2, 8\\):\n    path = base\\.format\\(i\\)\n    with open\\(path, 'w'\\) as f:\n        f\\.write\\(content\\)\n    print\\(f\"Updated feat-\\{i\\}\"\\)\nPYEOF$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "mkdir": true
     }
 }

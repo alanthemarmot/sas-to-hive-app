@@ -1,45 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap');
 
+/* Revenue Design System (RDS v20.0.1) colour tokens */
 :root {
-  --bg-primary: #1e1e1e;
-  --bg-secondary: #252526;
-  --bg-tertiary: #2d2d30;
-  --text-primary: #d4d4d4;
-  --text-secondary: #909090;
-  --accent: #0078d4;
-  --accent-hover: #1a8ad4;
-  --border: #3e3e42;
-  --success: #4ec9b0;
-  --warning: #dcdcaa;
-  --error: #f44747;
-  --hover-bg: rgba(255, 255, 255, 0.05);
-  --row-even-bg: rgba(255, 255, 255, 0.03);
-  --row-hover-bg: rgba(255, 255, 255, 0.07);
-  --spinner-track: rgba(255, 255, 255, 0.3);
-  --spinner-head: #ffffff;
-  --dragover-bg: rgba(0, 120, 212, 0.1);
-  --selected-bg: rgba(0, 120, 212, 0.2);
-}
+  /* Surface scale */
+  --bg-primary: #f4f4f4;       /* surface-50: page background */
+  --bg-secondary: #f8f9fa;     /* surface-100: card/panel background */
+  --bg-tertiary: #e9ecef;      /* surface-200: toolbar/section background */
+  --text-primary: #485057;     /* surface-700: body text */
+  --text-secondary: #6c757d;   /* surface-600: secondary/muted text */
+  --text-heading: #343a40;     /* surface-800: headings */
 
-[data-theme="light"] {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f3f3f3;
-  --bg-tertiary: #e8e8e8;
-  --text-primary: #1e1e1e;
-  --text-secondary: #6e6e6e;
-  --accent: #0078d4;
-  --accent-hover: #106ebe;
-  --border: #d4d4d4;
-  --success: #267f99;
-  --warning: #795e26;
-  --error: #cd3131;
-  --hover-bg: rgba(0, 0, 0, 0.05);
-  --row-even-bg: rgba(0, 0, 0, 0.03);
-  --row-hover-bg: rgba(0, 0, 0, 0.07);
-  --spinner-track: rgba(0, 0, 0, 0.2);
-  --spinner-head: #0078d4;
-  --dragover-bg: rgba(0, 120, 212, 0.08);
-  --selected-bg: rgba(0, 120, 212, 0.15);
+  /* Brand */
+  --accent: #005a5c;           /* base-brandteal: primary brand */
+  --accent-hover: #008c8f;     /* brandteal-lighten-10: hover state */
+  --accent-secondary: #428f94; /* base-brandmint: secondary brand */
+
+  /* Borders */
+  --border: #dee2e6;           /* surface-300 */
+  --border-light: #e9ecef;     /* surface-200 */
+
+  /* Semantic status */
+  --success: #155b25;          /* base-green */
+  --warning: #ffc12c;          /* base-yellow */
+  --error: #a51d2b;            /* base-red */
+  --info: #006fe6;             /* base-blue */
+
+  /* Derived / interaction */
+  --hover-bg: rgba(0, 90, 92, 0.06);
+  --row-even-bg: rgba(0, 0, 0, 0.025);
+  --row-hover-bg: rgba(0, 90, 92, 0.05);
+  --spinner-track: rgba(0, 90, 92, 0.2);
+  --spinner-head: #005a5c;
+  --dragover-bg: rgba(0, 90, 92, 0.08);
+  --selected-bg: rgba(0, 90, 92, 0.12);
+
+  /* Header (brandteal background) */
+  --header-bg: #005a5c;        /* base-brandteal */
+  --header-border: #004042;    /* brandteal-darken-10 */
+  --header-text: #ffffff;      /* base-white */
+  --header-text-muted: rgba(255, 255, 255, 0.7);
+  --header-hover: rgba(255, 255, 255, 0.12);
+  --header-btn-border: rgba(255, 255, 255, 0.3);
 }
 
 *,
@@ -57,8 +58,8 @@ body {
 }
 
 body {
-  font-family: 'Fira Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
   background: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;

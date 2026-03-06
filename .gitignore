@@ -6,3 +6,4 @@ dist/
 
 # Feature worktrees (managed by git worktree)
 .trees/
+.DS_Store

@@ -36,7 +36,7 @@
 }
 
 .error-banner {
-  background: rgba(244, 71, 71, 0.15);
+  background: rgba(165, 29, 43, 0.1);
   color: var(--error);
   border-left: 3px solid var(--error);
   padding: 8px 12px;

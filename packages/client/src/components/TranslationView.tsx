@@ -9,7 +9,6 @@ interface TranslationViewProps {
   hiveSQL: string;
   isTranslating: boolean;
   error: string | null;
-  theme: 'dark' | 'light';
 }
 
 export default function TranslationView({
@@ -18,9 +17,7 @@ export default function TranslationView({
   hiveSQL,
   isTranslating,
   error,
-  theme,
 }: TranslationViewProps) {
-  const monacoTheme = theme === 'dark' ? 'vs-dark' : 'light';
   return (
     <div className="translation-view">
       {/* SAS Input Panel */}
@@ -30,13 +27,14 @@ export default function TranslationView({
           <Editor
             beforeMount={registerSasLanguage}
             language="sas"
-            theme={monacoTheme}
+            theme="light"
             value={sasCode}
             onChange={(value) => onSasCodeChange(value ?? '')}
             options={{
               minimap: { enabled: false },
               lineNumbers: 'on',
               fontSize: 13,
+              fontFamily: "'Fira Code', 'Consolas', 'Courier New', monospace",
               wordWrap: 'on',
               scrollBeyondLastLine: false,
               automaticLayout: true,
@@ -60,13 +58,14 @@ export default function TranslationView({
           ) : (
             <Editor
               language="sql"
-              theme={monacoTheme}
+              theme="light"
               value={hiveSQL}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },
                 lineNumbers: 'on',
                 fontSize: 13,
+                fontFamily: "'Fira Code', 'Consolas', 'Courier New', monospace",
                 wordWrap: 'on',
                 scrollBeyondLastLine: false,
                 automaticLayout: true,

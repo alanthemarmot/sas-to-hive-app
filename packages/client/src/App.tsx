@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { streamTranslation, executeHiveQuery } from './api/client';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
@@ -37,16 +37,6 @@ export default function App() {
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    return (localStorage.getItem('sas-hive-theme') as 'dark' | 'light') || 'dark';
-  });
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('sas-hive-theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
 
   const handleTranslate = useCallback(async () => {
     if (!sasCode.trim()) return;
@@ -161,16 +151,13 @@ export default function App() {
         >
           {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
         </button>
-        <h1>SAS → Hive Translator</h1>
-        <span className="app-subtitle">Proof of Concept</span>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
+        <img
+          src="/assets/revenue-harp-placeholder.svg"
+          alt="Revenue"
+          className="app-logo"
+        />
+        <h1>SAS → HiveQL Translation Tool</h1>
+        <span className="app-subtitle">Revenue Commissioners</span>
       </header>
       <div className="app-body">
         <aside className={`sidebar${sidebarOpen ? '' : ' sidebar--collapsed'}`}>
@@ -194,7 +181,6 @@ export default function App() {
             hiveSQL={hiveSQL}
             isTranslating={isTranslating}
             error={error}
-            theme={theme}
           />
           {showExplanation && explanation && (
             <ExplanationPanel
