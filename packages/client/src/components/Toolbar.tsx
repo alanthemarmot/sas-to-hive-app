@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Copy, Download, Play } from 'lucide-react';
+import { ArrowRightLeft, Copy, Download, Play, MessageCircle } from 'lucide-react';
 import './Toolbar.css';
 
 interface ToolbarProps {
@@ -6,6 +6,7 @@ interface ToolbarProps {
   onCopy: () => void;
   onDownload: () => void;
   onExecute: () => void;
+  onToggleChat: () => void;
   isTranslating: boolean;
   hasOutput: boolean;
   selectedModel: string;
@@ -22,6 +23,7 @@ export default function Toolbar({
   onCopy,
   onDownload,
   onExecute,
+  onToggleChat,
   isTranslating,
   hasOutput,
   selectedModel,
@@ -73,6 +75,17 @@ export default function Toolbar({
       >
         <Play size={14} aria-hidden="true" />
         Execute on Hive
+      </button>
+
+      <button
+        className="toolbar-btn btn-secondary"
+        onClick={onToggleChat}
+        disabled={!hasOutput}
+        aria-label="Ask a question about this translation"
+        title="Ask a question about this translation"
+      >
+        <MessageCircle size={14} aria-hidden="true" />
+        Ask
       </button>
 
       <div className="toolbar-spacer" />

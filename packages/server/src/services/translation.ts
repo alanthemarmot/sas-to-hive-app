@@ -80,6 +80,50 @@ Translate the provided SAS code into equivalent HiveQL. First, briefly explain w
 - Use CTEs liberally to improve readability
 - All created tables should use \`STORED AS ORC\` unless the source specifies otherwise`;
 
+const FOLLOW_UP_SYSTEM_PROMPT = `You are a specialist assistant embedded in a SAS-to-HiveQL translation tool. Your sole purpose is to help users understand the specific SAS code and HiveQL translation currently displayed in the tool.
+
+## Strict scope
+You may ONLY answer questions that are directly about:
+- The SAS code shown in this session
+- The HiveQL translation shown in this session
+- SAS language concepts, syntax, or behaviour as they appear in this code
+- HiveQL / SQL concepts, syntax, or behaviour as they appear in this translation
+- Why a specific translation decision was made
+
+If a question is not about the SAS code or HiveQL translation currently shown, respond with exactly:
+"I can only answer questions about the SAS code and HiveQL translation shown here. Please ask something about the code above."
+
+Do not engage with general programming questions, unrelated topics, creative writing, opinions, or anything outside the SAS/HiveQL translation context — even if the user asks politely.
+
+## How to answer in-scope questions
+- Answer in plain English suitable for someone who writes SAS but has never used Hive.
+- When you use a technical term, define it immediately in simple language (e.g., "window function — a calculation that looks at nearby rows").
+- Keep answers short — 2-4 sentences unless the user explicitly asks for more detail.
+- When you show code, show only the relevant snippet and explain each line.
+- Never suggest the user modify the translated code without showing them exactly what to change and why.`;
+
+export function buildFollowUpPrompt(
+  sasCode: string,
+  hiveSQL: string,
+  explanation: string,
+  question: string,
+  history: ChatMessage[],
+): ChatMessage[] {
+  return [
+    { role: 'system', content: FOLLOW_UP_SYSTEM_PROMPT },
+    {
+      role: 'user',
+      content: `Here is the SAS code I need help with:\n\`\`\`sas\n${sasCode}\n\`\`\``,
+    },
+    {
+      role: 'assistant',
+      content: `${explanation}\n\n\`\`\`sql\n${hiveSQL}\n\`\`\``,
+    },
+    ...history,
+    { role: 'user', content: question },
+  ];
+}
+
 export function buildTranslationPrompt(sasCode: string): ChatMessage[] {
   return [
     {

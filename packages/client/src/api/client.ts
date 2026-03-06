@@ -130,3 +130,66 @@ export async function executeHiveQuery(
   }
   return response.json();
 }
+
+export async function* streamFollowUp(
+  sasCode: string,
+  hiveSQL: string,
+  explanation: string,
+  question: string,
+  history: { role: string; content: string }[],
+  model?: string,
+): AsyncGenerator<string> {
+  const response = await fetch(`${API_BASE}/translate/followup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sasCode, hiveSQL, explanation, question, history, model }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: response.statusText }));
+    throw new Error(err.error || 'Follow-up stream failed');
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('data: ')) {
+        const data = trimmed.slice(6);
+        if (data === '[DONE]') return;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.error) throw new Error(parsed.error);
+          if (typeof parsed.token === 'string') yield parsed.token;
+        } catch (e) {
+          if (e instanceof Error && e.message !== data) throw e;
+        }
+      }
+    }
+  }
+
+  if (buffer.trim().startsWith('data: ')) {
+    const data = buffer.trim().slice(6);
+    if (data !== '[DONE]') {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.error) throw new Error(parsed.error);
+        if (typeof parsed.token === 'string') yield parsed.token;
+      } catch {
+        // ignore malformed trailing data
+      }
+    }
+  }
+}

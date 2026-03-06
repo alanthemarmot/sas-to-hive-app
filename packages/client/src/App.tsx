@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Sun, Moon, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { streamTranslation, executeHiveQuery } from './api/client';
+import ChatPanel from './components/ChatPanel';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
 import ExplanationPanel from './components/ExplanationPanel';
@@ -26,6 +27,7 @@ export default function App() {
   const [hiveResults, setHiveResults] = useState<HiveResultData | null>(null);
   const [showExplanation, setShowExplanation] = useState(true);
   const [showHiveResults, setShowHiveResults] = useState(true);
+  const [showChat, setShowChat] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -55,6 +57,7 @@ export default function App() {
     setExplanation('');
     setError(null);
     setHiveResults(null);
+    setShowChat(false);
 
     try {
       let fullOutput = '';
@@ -183,6 +186,7 @@ export default function App() {
             onCopy={handleCopy}
             onDownload={handleDownload}
             onExecute={handleExecute}
+            onToggleChat={() => setShowChat((v) => !v)}
             isTranslating={isTranslating}
             hasOutput={!!hiveSQL}
             selectedModel={selectedModel}
@@ -208,6 +212,15 @@ export default function App() {
               onClose={() => setShowHiveResults(false)}
             />
           )}
+          <ChatPanel
+            sasCode={sasCode}
+            hiveSQL={hiveSQL}
+            explanation={explanation}
+            theme={theme}
+            isVisible={showChat}
+            onClose={() => setShowChat(false)}
+            selectedModel={selectedModel}
+          />
         </main>
       </div>
       <Toast toasts={toasts} onDismiss={dismissToast} />
