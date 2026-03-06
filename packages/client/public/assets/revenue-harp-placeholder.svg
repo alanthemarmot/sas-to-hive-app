@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <!-- Placeholder Revenue harp icon — replace with approved asset -->
+  <!-- Simplified harp silhouette in white for use on brandteal header -->
+  <g fill="#ffffff">
+    <!-- Harp frame (curved pillar) -->
+    <path d="M12 36 C12 36 8 28 8 18 C8 8 14 4 20 4 C26 4 32 8 32 18 L30 18 C30 10 26 6 20 6 C14 6 10 10 10 18 C10 28 14 36 14 36 Z"/>
+    <!-- Harp base -->
+    <rect x="10" y="35" width="8" height="2" rx="1"/>
+    <!-- Strings -->
+    <rect x="14" y="10" width="1" height="25" rx="0.5"/>
+    <rect x="17.5" y="7" width="1" height="28" rx="0.5"/>
+    <rect x="21" y="6" width="1" height="29" rx="0.5"/>
+    <rect x="24.5" y="7" width="1" height="28" rx="0.5"/>
+    <rect x="28" y="10" width="1" height="25" rx="0.5"/>
+  </g>
+</svg>

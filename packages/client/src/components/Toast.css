@@ -18,7 +18,7 @@
   font-size: 13px;
   min-width: 220px;
   max-width: 360px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   pointer-events: all;
   animation: toast-in 0.2s ease;
 }
