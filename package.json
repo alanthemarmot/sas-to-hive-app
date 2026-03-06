@@ -13,7 +13,8 @@
     "build": "npm run build --workspace=packages/client",
     "start": "npm run start --workspace=packages/server",
     "demo": "bash scripts/start-demo.sh",
-    "demo:open": "open demo/index.html"
+    "demo:open": "open demo/index.html",
+    "demo:stop": "bash scripts/stop-demo.sh"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../packages/client/public/favicon.svg" />
   <title>SAS → HiveQL · Feature Demo Navigator</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -139,6 +140,14 @@
       flex-shrink: 0;
       margin-top: 0.1rem;
     }
+    .card-num.main {
+      background: var(--surface-700);
+      font-size: 0.55rem;
+      letter-spacing: -0.01em;
+    }
+    .card.card-main {
+      border-left: 3px solid var(--brandteal);
+    }
     .card-title { font-size: 0.95rem; font-weight: 600; color: var(--surface-800); line-height: 1.3; }
     .card-branch { font-size: 0.72rem; color: var(--surface-600); margin-top: 0.15rem; font-family: "Cascadia Code", "Fira Code", monospace; }
 
@@ -249,7 +258,7 @@
 </header>
 
 <div class="toolbar">
-  <span>Start servers first: <strong>npm run demo</strong> from the workspace root</span>
+      <span>Start: <strong>npm run demo</strong> &nbsp;·&nbsp; Stop: <strong>npm run demo:stop</strong></span>
   <button class="btn-start-all" onclick="checkAll()">
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <circle cx="6" cy="6" r="5" stroke="#005a5c" stroke-width="1.5"/>
@@ -283,6 +292,14 @@
 
 <script>
   const features = [
+    {
+      num: 0,
+      title: "Main App (trunk)",
+      branch: "main",
+      clientPort: 5173,
+      serverPort: 3001,
+      desc: "The baseline SAS \u2192 HiveQL translation app on the main branch. All feature branches are forked from this \u2014 use it as the reference during the demo."
+    },
     {
       num: 1,
       title: "Conversational Follow-up",
@@ -342,11 +359,12 @@
   ];
 
   function buildCard(f) {
-    const id = `feat-${f.num}`;
+    const isMain = f.num === 0;
+    const numLabel = isMain ? 'main' : f.num;
     return `
-      <article class="card" id="card-${f.num}">
+      <article class="card${isMain ? ' card-main' : ''}" id="card-${f.num}">
         <div class="card-header">
-          <div class="card-num">${f.num}</div>
+          <div class="card-num${isMain ? ' main' : ''}">${isMain ? '✦' : f.num}</div>
           <div>
             <div class="card-title">${f.title}</div>
             <div class="card-branch">${f.branch}</div>
