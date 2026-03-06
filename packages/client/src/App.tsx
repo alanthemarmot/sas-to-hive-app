@@ -23,6 +23,7 @@ export default function App() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState('openai/gpt-4.1-mini');
+  const [selectedDialect, setSelectedDialect] = useState<'hive' | 'bigquery' | 'spark'>('hive');
   const [hiveResults, setHiveResults] = useState<HiveResultData | null>(null);
   const [showExplanation, setShowExplanation] = useState(true);
   const [showHiveResults, setShowHiveResults] = useState(true);
@@ -48,7 +49,7 @@ export default function App() {
 
     try {
       let fullOutput = '';
-      for await (const token of streamTranslation(sasCode, selectedModel)) {
+      for await (const token of streamTranslation(sasCode, selectedModel, selectedDialect)) {
         fullOutput += token;
         // Parse <!-- EXPLANATION_START --> ... <!-- EXPLANATION_END --> markers
         const startMarker = '<!-- EXPLANATION_START -->';
@@ -89,7 +90,7 @@ export default function App() {
     } finally {
       setIsTranslating(false);
     }
-  }, [sasCode, selectedModel]);
+  }, [sasCode, selectedModel, selectedDialect]);
 
   // Cmd+Enter / Ctrl+Enter keyboard shortcut for translate
   useEffect(() => {
@@ -112,18 +113,26 @@ export default function App() {
     }
   };
 
+  const DIALECT_EXTENSIONS: Record<string, string> = {
+    hive: '.hql',
+    bigquery: '.sql',
+    spark: '.sql',
+  };
+
   const handleDownload = () => {
     if (!hiveSQL) return;
+    const ext = DIALECT_EXTENSIONS[selectedDialect] ?? '.sql';
+    const filename = `translated${ext}`;
     const blob = new Blob([hiveSQL], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'translated.hql';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    addToast('success', 'Downloaded translated.hql');
+    addToast('success', `Downloaded ${filename}`);
   };
 
   const handleExecute = async () => {
@@ -156,7 +165,7 @@ export default function App() {
           alt="Revenue"
           className="app-logo"
         />
-        <h1>SAS → HiveQL Translation Tool</h1>
+        <h1>SAS → SQL Translation Tool</h1>
         <span className="app-subtitle">Revenue Commissioners</span>
       </header>
       <div className="app-body">
@@ -174,6 +183,14 @@ export default function App() {
             hasOutput={!!hiveSQL}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
+            selectedDialect={selectedDialect}
+            onDialectChange={(d) => {
+              setSelectedDialect(d as 'hive' | 'bigquery' | 'spark');
+              setHiveSQL('');
+              setExplanation('');
+              setError(null);
+              setHiveResults(null);
+            }}
           />
           <TranslationView
             sasCode={sasCode}
@@ -181,6 +198,7 @@ export default function App() {
             hiveSQL={hiveSQL}
             isTranslating={isTranslating}
             error={error}
+            dialect={selectedDialect}
           />
           {showExplanation && explanation && (
             <ExplanationPanel

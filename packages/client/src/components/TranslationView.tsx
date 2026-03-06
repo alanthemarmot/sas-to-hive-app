@@ -3,12 +3,19 @@ import { AlertTriangle } from 'lucide-react';
 import { registerSasLanguage } from '../lib/sas-language.js';
 import './TranslationView.css';
 
+const OUTPUT_LABELS: Record<string, string> = {
+  hive: 'HiveQL Output',
+  bigquery: 'BigQuery SQL Output',
+  spark: 'Spark SQL Output',
+};
+
 interface TranslationViewProps {
   sasCode: string;
   onSasCodeChange: (value: string) => void;
   hiveSQL: string;
   isTranslating: boolean;
   error: string | null;
+  dialect: string;
 }
 
 export default function TranslationView({
@@ -17,6 +24,7 @@ export default function TranslationView({
   hiveSQL,
   isTranslating,
   error,
+  dialect,
 }: TranslationViewProps) {
   return (
     <div className="translation-view">
@@ -45,7 +53,7 @@ export default function TranslationView({
 
       {/* Hive Output Panel */}
       <div className={`editor-panel${isTranslating && hiveSQL ? ' editor-panel--streaming' : ''}`}>
-        <div className="editor-panel-header">Hive Output</div>
+        <div className="editor-panel-header">{OUTPUT_LABELS[dialect] ?? 'SQL Output'}</div>
         {error && (
           <div className="error-banner" role="alert">
             <AlertTriangle size={13} aria-hidden="true" />

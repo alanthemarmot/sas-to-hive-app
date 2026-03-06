@@ -10,7 +10,15 @@ interface ToolbarProps {
   hasOutput: boolean;
   selectedModel: string;
   onModelChange: (model: string) => void;
+  selectedDialect: string;
+  onDialectChange: (dialect: string) => void;
 }
+
+const DIALECTS = [
+  { id: 'hive',     label: 'HiveQL' },
+  { id: 'bigquery', label: 'BigQuery SQL' },
+  { id: 'spark',    label: 'Spark SQL' },
+] as const;
 
 const MODELS = [
   { id: 'openai/gpt-4.1-mini', label: 'GPT-4.1 Mini' },
@@ -26,6 +34,8 @@ export default function Toolbar({
   hasOutput,
   selectedModel,
   onModelChange,
+  selectedDialect,
+  onDialectChange,
 }: ToolbarProps) {
   return (
     <div className="toolbar">
@@ -76,6 +86,19 @@ export default function Toolbar({
       </button>
 
       <div className="toolbar-spacer" />
+
+      <label htmlFor="dialect-select" className="model-label">Target</label>
+      <select
+        id="dialect-select"
+        className="model-select"
+        value={selectedDialect}
+        onChange={(e) => onDialectChange(e.target.value)}
+        aria-label="Select target SQL dialect"
+      >
+        {DIALECTS.map((d) => (
+          <option key={d.id} value={d.id}>{d.label}</option>
+        ))}
+      </select>
 
       <label htmlFor="model-select" className="model-label">Model</label>
       <select

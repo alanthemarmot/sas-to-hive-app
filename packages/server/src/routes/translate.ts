@@ -1,20 +1,25 @@
 import { Router, type Request, type Response } from 'express';
 import { chatCompletion, chatCompletionStream, DEFAULT_MODEL } from '../services/github-models.js';
-import { buildTranslationPrompt, parseTranslationResponse } from '../services/translation.js';
+import { buildTranslationPrompt, parseTranslationResponse, VALID_DIALECTS, type Dialect } from '../services/translation.js';
 
 const router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { sasCode, model } = req.body;
+    const { sasCode, model, dialect = 'hive' } = req.body;
 
     if (!sasCode || typeof sasCode !== 'string' || sasCode.trim().length === 0) {
       res.status(400).json({ error: 'sasCode is required and must be a non-empty string.' });
       return;
     }
 
+    if (!VALID_DIALECTS.includes(dialect)) {
+      res.status(400).json({ error: `Invalid dialect. Must be one of: ${VALID_DIALECTS.join(', ')}` });
+      return;
+    }
+
     const usedModel = model || DEFAULT_MODEL;
-    const messages = buildTranslationPrompt(sasCode);
+    const messages = buildTranslationPrompt(sasCode, dialect as Dialect);
 
     const response = await chatCompletion({
       messages,
@@ -35,15 +40,20 @@ router.post('/', async (req: Request, res: Response) => {
 
 router.post('/stream', async (req: Request, res: Response) => {
   try {
-    const { sasCode, model } = req.body;
+    const { sasCode, model, dialect = 'hive' } = req.body;
 
     if (!sasCode || typeof sasCode !== 'string' || sasCode.trim().length === 0) {
       res.status(400).json({ error: 'sasCode is required and must be a non-empty string.' });
       return;
     }
 
+    if (!VALID_DIALECTS.includes(dialect)) {
+      res.status(400).json({ error: `Invalid dialect. Must be one of: ${VALID_DIALECTS.join(', ')}` });
+      return;
+    }
+
     const usedModel = model || DEFAULT_MODEL;
-    const messages = buildTranslationPrompt(sasCode);
+    const messages = buildTranslationPrompt(sasCode, dialect as Dialect);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
