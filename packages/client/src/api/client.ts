@@ -5,16 +5,19 @@ export interface FileNode {
   children?: FileNode[];
 }
 
+import type { ContextFile } from '../lib/context-validation';
+
 const API_BASE = '/api';
 
 export async function translateSasToHive(
   sasCode: string,
   model?: string,
+  context?: ContextFile | null,
 ): Promise<{ hiveSQL: string; explanation: string; model: string }> {
   const response = await fetch(`${API_BASE}/translate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sasCode, model }),
+    body: JSON.stringify({ sasCode, model, ...(context ? { context } : {}) }),
   });
   if (!response.ok) {
     const err = await response.json().catch(() => ({ error: response.statusText }));
@@ -26,11 +29,12 @@ export async function translateSasToHive(
 export async function* streamTranslation(
   sasCode: string,
   model?: string,
+  context?: ContextFile | null,
 ): AsyncGenerator<string> {
   const response = await fetch(`${API_BASE}/translate/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sasCode, model }),
+    body: JSON.stringify({ sasCode, model, ...(context ? { context } : {}) }),
   });
 
   if (!response.ok) {

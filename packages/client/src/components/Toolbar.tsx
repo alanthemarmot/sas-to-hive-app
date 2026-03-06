@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Copy, Download, Play } from 'lucide-react';
+import { ArrowRightLeft, Copy, Download, Play, Database } from 'lucide-react';
 import './Toolbar.css';
 
 interface ToolbarProps {
@@ -10,6 +10,7 @@ interface ToolbarProps {
   hasOutput: boolean;
   selectedModel: string;
   onModelChange: (model: string) => void;
+  contextName: string | null;
 }
 
 const MODELS = [
@@ -26,6 +27,7 @@ export default function Toolbar({
   hasOutput,
   selectedModel,
   onModelChange,
+  contextName,
 }: ToolbarProps) {
   return (
     <div className="toolbar">
@@ -76,6 +78,17 @@ export default function Toolbar({
       </button>
 
       <div className="toolbar-spacer" />
+
+      {contextName && (
+        <span
+          className="toolbar-context-badge"
+          title={`Context: ${contextName}`}
+          aria-label={`Active context: ${contextName}`}
+        >
+          <Database size={12} aria-hidden="true" />
+          {contextName.length > 20 ? contextName.slice(0, 20) + '\u2026' : contextName}
+        </span>
+      )}
 
       <label htmlFor="model-select" className="model-label">Model</label>
       <select

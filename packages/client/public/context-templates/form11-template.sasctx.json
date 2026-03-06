@@ -1,0 +1,63 @@
+{
+  "version": "1",
+  "name": "Form 11 — Self-Assessed Income Tax",
+  "description": "Context for translating SAS programs related to Form 11 self-assessed income tax processing. Covers income lines, liabilities, and reference tax-rate tables.",
+  "taxArea": "Form11",
+  "targetDialect": "hive",
+  "tableMappings": [
+    {
+      "sasLibrary": "F11LIB",
+      "sasDataset": "*",
+      "targetSchema": "form11",
+      "targetTable": "{dataset}",
+      "notes": "All Form 11 tables live in the form11 Hive schema"
+    },
+    {
+      "sasLibrary": "WORK",
+      "sasDataset": "F11_INCOME",
+      "targetSchema": "form11",
+      "targetTable": "income_lines"
+    },
+    {
+      "sasLibrary": "WORK",
+      "sasDataset": "F11_LIABILITIES",
+      "targetSchema": "form11",
+      "targetTable": "liabilities"
+    },
+    {
+      "sasLibrary": "REFLIB",
+      "sasDataset": "TAX_RATES",
+      "targetSchema": "reference",
+      "targetTable": "tax_rates"
+    }
+  ],
+  "schemas": [
+    {
+      "targetTable": "form11.income_lines",
+      "columns": [
+        { "name": "ppsn",           "type": "STRING",        "nullable": false, "description": "Personal Public Service Number — primary identifier" },
+        { "name": "tax_year_short", "type": "INT",           "nullable": false, "description": "Tax year as 2-digit integer e.g. 23 for 2023" },
+        { "name": "income_type",    "type": "STRING",        "nullable": false, "description": "Category code: PAYE, SELF, RENT, DIV, etc." },
+        { "name": "gross_income",   "type": "DECIMAL(15,2)", "nullable": true,  "description": "Gross income before reliefs" },
+        { "name": "net_income",     "type": "DECIMAL(15,2)", "nullable": true,  "description": "Income after standard reliefs" }
+      ]
+    },
+    {
+      "targetTable": "form11.liabilities",
+      "columns": [
+        { "name": "ppsn",           "type": "STRING",        "nullable": false, "description": "Personal Public Service Number" },
+        { "name": "tax_year_short", "type": "INT",           "nullable": false, "description": "Tax year (2-digit)" },
+        { "name": "liability_type", "type": "STRING",        "nullable": false, "description": "IT, PRSI, USC, etc." },
+        { "name": "amount_due",     "type": "DECIMAL(15,2)", "nullable": true,  "description": "Total liability amount" }
+      ]
+    }
+  ],
+  "businessRules": [
+    "Deduplication on ppsn should always use tax_year_short as a secondary sort key",
+    "tax_year_short values prior to 10 represent years 2010 onwards (2-digit year)",
+    "gross_income can be NULL for exempt income types — treat NULL as 0 in aggregations",
+    "The form11.income_lines table is partitioned by tax_year_short — always include it in WHERE for performance"
+  ],
+  "commonPartitionKeys": ["ppsn", "tax_year_short"],
+  "promptNotes": "This is internal Revenue Commissioners data. Never suggest external table names or schemas not listed above."
+}

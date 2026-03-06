@@ -1,12 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { streamTranslation, executeHiveQuery } from './api/client';
+import { type ContextFile } from './lib/context-validation';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
 import ExplanationPanel from './components/ExplanationPanel';
 import HiveResults from './components/HiveResults';
 import FileTree from './components/FileTree';
 import FileUpload from './components/FileUpload';
+import ContextPanel from './components/ContextPanel';
 import Toast, { type ToastMessage } from './components/Toast';
 import './App.css';
 
@@ -27,7 +29,48 @@ export default function App() {
   const [showExplanation, setShowExplanation] = useState(true);
   const [showHiveResults, setShowHiveResults] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
+  const isResizing = useRef(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Domain context state — persisted in localStorage
+  const [context, setContext] = useState<ContextFile | null>(() => {
+    try {
+      const saved = localStorage.getItem('sas-hive-context');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+
+  useEffect(() => {
+    if (context) {
+      localStorage.setItem('sas-hive-context', JSON.stringify(context));
+    } else {
+      localStorage.removeItem('sas-hive-context');
+    }
+  }, [context]);
+
+  // Sidebar drag-to-resize
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isResizing.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return;
+      const newWidth = Math.min(Math.max(ev.clientX, 200), 600);
+      setSidebarWidth(newWidth);
+    };
+    const onMouseUp = () => {
+      isResizing.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, []);
 
   const addToast = useCallback((type: 'success' | 'error', message: string) => {
     const id = `${Date.now()}`;
@@ -48,7 +91,7 @@ export default function App() {
 
     try {
       let fullOutput = '';
-      for await (const token of streamTranslation(sasCode, selectedModel)) {
+      for await (const token of streamTranslation(sasCode, selectedModel, context)) {
         fullOutput += token;
         // Parse <!-- EXPLANATION_START --> ... <!-- EXPLANATION_END --> markers
         const startMarker = '<!-- EXPLANATION_START -->';
@@ -89,7 +132,7 @@ export default function App() {
     } finally {
       setIsTranslating(false);
     }
-  }, [sasCode, selectedModel]);
+  }, [sasCode, selectedModel, context]);
 
   // Cmd+Enter / Ctrl+Enter keyboard shortcut for translate
   useEffect(() => {
@@ -160,10 +203,23 @@ export default function App() {
         <span className="app-subtitle">Revenue Commissioners</span>
       </header>
       <div className="app-body">
-        <aside className={`sidebar${sidebarOpen ? '' : ' sidebar--collapsed'}`}>
+        <aside
+          className={`sidebar${sidebarOpen ? '' : ' sidebar--collapsed'}`}
+          style={sidebarOpen ? { width: sidebarWidth } : undefined}
+        >
           <FileTree onFileSelect={(content) => setSasCode(content)} />
           <FileUpload onFileLoaded={(content) => setSasCode(content)} onToast={addToast} />
+          <ContextPanel context={context} onContextChange={setContext} onToast={addToast} />
         </aside>
+        {sidebarOpen && (
+          <div
+            className="sidebar-resize-handle"
+            onMouseDown={handleResizeStart}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize sidebar"
+          />
+        )}
         <main id="main-content" className="main-content">
           <Toolbar
             onTranslate={handleTranslate}
@@ -174,6 +230,7 @@ export default function App() {
             hasOutput={!!hiveSQL}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
+            contextName={context?.name ?? null}
           />
           <TranslationView
             sasCode={sasCode}

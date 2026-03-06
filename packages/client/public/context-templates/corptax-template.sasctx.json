@@ -1,0 +1,71 @@
+{
+  "version": "1",
+  "name": "Corporation Tax",
+  "description": "Context for translating SAS programs related to Corporation Tax (CT) processing. Covers company returns, trade income, and loss relief tables.",
+  "taxArea": "CorpTax",
+  "targetDialect": "hive",
+  "tableMappings": [
+    {
+      "sasLibrary": "CTLIB",
+      "sasDataset": "*",
+      "targetSchema": "corp_tax",
+      "targetTable": "{dataset}",
+      "notes": "All Corporation Tax tables live in the corp_tax Hive schema"
+    },
+    {
+      "sasLibrary": "WORK",
+      "sasDataset": "CT_RETURNS",
+      "targetSchema": "corp_tax",
+      "targetTable": "returns"
+    },
+    {
+      "sasLibrary": "WORK",
+      "sasDataset": "CT_TRADE_INCOME",
+      "targetSchema": "corp_tax",
+      "targetTable": "trade_income"
+    },
+    {
+      "sasLibrary": "WORK",
+      "sasDataset": "CT_LOSS_RELIEF",
+      "targetSchema": "corp_tax",
+      "targetTable": "loss_relief"
+    },
+    {
+      "sasLibrary": "REFLIB",
+      "sasDataset": "CT_RATES",
+      "targetSchema": "reference",
+      "targetTable": "ct_rates"
+    }
+  ],
+  "schemas": [
+    {
+      "targetTable": "corp_tax.returns",
+      "columns": [
+        { "name": "company_id",       "type": "STRING",        "nullable": false, "description": "Unique company identifier (tax reference number)" },
+        { "name": "accounting_period", "type": "STRING",        "nullable": false, "description": "Accounting period end date as YYYY-MM" },
+        { "name": "return_status",     "type": "STRING",        "nullable": false, "description": "FILED, ESTIMATED, AMENDED" },
+        { "name": "total_income",      "type": "DECIMAL(15,2)", "nullable": true,  "description": "Total income from all sources" },
+        { "name": "tax_payable",       "type": "DECIMAL(15,2)", "nullable": true,  "description": "Net CT payable after credits" }
+      ]
+    },
+    {
+      "targetTable": "corp_tax.trade_income",
+      "columns": [
+        { "name": "company_id",       "type": "STRING",        "nullable": false, "description": "Unique company identifier" },
+        { "name": "accounting_period", "type": "STRING",        "nullable": false, "description": "Accounting period end date as YYYY-MM" },
+        { "name": "trade_class",       "type": "STRING",        "nullable": false, "description": "Trade classification code" },
+        { "name": "gross_profit",      "type": "DECIMAL(15,2)", "nullable": true,  "description": "Gross trading profit" },
+        { "name": "allowable_expenses","type": "DECIMAL(15,2)", "nullable": true,  "description": "Allowable trading expenses" }
+      ]
+    }
+  ],
+  "businessRules": [
+    "Deduplication on company_id should always use accounting_period as a secondary key",
+    "accounting_period is stored as YYYY-MM string, not a date — use string comparison for ordering",
+    "CT rate depends on company size: 12.5% standard, 25% higher rate — join with reference.ct_rates",
+    "Loss relief carry-forward must be applied in chronological order by accounting_period",
+    "The corp_tax.returns table is partitioned by accounting_period — always include it in WHERE for performance"
+  ],
+  "commonPartitionKeys": ["company_id", "accounting_period"],
+  "promptNotes": "This is internal Revenue Commissioners data. Never suggest external table names or schemas not listed above."
+}

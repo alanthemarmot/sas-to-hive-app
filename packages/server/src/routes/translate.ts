@@ -1,20 +1,31 @@
 import { Router, type Request, type Response } from 'express';
 import { chatCompletion, chatCompletionStream, DEFAULT_MODEL } from '../services/github-models.js';
-import { buildTranslationPrompt, parseTranslationResponse } from '../services/translation.js';
+import { buildTranslationPrompt, parseTranslationResponse, validateContextFile, type ContextFile } from '../services/translation.js';
 
 const router = Router();
 
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { sasCode, model } = req.body;
+    const { sasCode, model, context } = req.body;
 
     if (!sasCode || typeof sasCode !== 'string' || sasCode.trim().length === 0) {
       res.status(400).json({ error: 'sasCode is required and must be a non-empty string.' });
       return;
     }
 
+    let validatedContext: ContextFile | undefined;
+    if (context) {
+      try {
+        validateContextFile(context);
+        validatedContext = context;
+      } catch (err) {
+        res.status(400).json({ error: `Invalid context: ${err instanceof Error ? err.message : 'unknown error'}` });
+        return;
+      }
+    }
+
     const usedModel = model || DEFAULT_MODEL;
-    const messages = buildTranslationPrompt(sasCode);
+    const messages = buildTranslationPrompt(sasCode, validatedContext);
 
     const response = await chatCompletion({
       messages,
@@ -35,15 +46,26 @@ router.post('/', async (req: Request, res: Response) => {
 
 router.post('/stream', async (req: Request, res: Response) => {
   try {
-    const { sasCode, model } = req.body;
+    const { sasCode, model, context } = req.body;
 
     if (!sasCode || typeof sasCode !== 'string' || sasCode.trim().length === 0) {
       res.status(400).json({ error: 'sasCode is required and must be a non-empty string.' });
       return;
     }
 
+    let validatedContext: ContextFile | undefined;
+    if (context) {
+      try {
+        validateContextFile(context);
+        validatedContext = context;
+      } catch (err) {
+        res.status(400).json({ error: `Invalid context: ${err instanceof Error ? err.message : 'unknown error'}` });
+        return;
+      }
+    }
+
     const usedModel = model || DEFAULT_MODEL;
-    const messages = buildTranslationPrompt(sasCode);
+    const messages = buildTranslationPrompt(sasCode, validatedContext);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
