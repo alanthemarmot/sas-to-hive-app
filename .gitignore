@@ -3,3 +3,6 @@ dist/
 .env
 *.tsbuildinfo
 .vite/
+
+# Feature worktrees (managed by git worktree)
+.trees/
