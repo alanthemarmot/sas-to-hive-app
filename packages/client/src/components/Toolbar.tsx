@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Copy, Download, Play } from 'lucide-react';
+import { ArrowRightLeft, BookOpen, Copy, Download, Play } from 'lucide-react';
 import './Toolbar.css';
 
 interface ToolbarProps {
@@ -6,6 +6,7 @@ interface ToolbarProps {
   onCopy: () => void;
   onDownload: () => void;
   onExecute: () => void;
+  onOpenPatternLibrary: () => void;
   isTranslating: boolean;
   hasOutput: boolean;
   selectedModel: string;
@@ -22,6 +23,7 @@ export default function Toolbar({
   onCopy,
   onDownload,
   onExecute,
+  onOpenPatternLibrary,
   isTranslating,
   hasOutput,
   selectedModel,
@@ -38,6 +40,16 @@ export default function Toolbar({
       >
         {isTranslating ? <span className="spinner" aria-hidden="true" /> : <ArrowRightLeft size={14} aria-hidden="true" />}
         {isTranslating ? 'Translating…' : 'Translate'}
+      </button>
+
+      <button
+        className="toolbar-btn btn-secondary"
+        onClick={onOpenPatternLibrary}
+        title="Browse common SAS patterns"
+        aria-label="Browse SAS pattern library"
+      >
+        <BookOpen size={14} aria-hidden="true" />
+        Examples
       </button>
 
       <div className="toolbar-separator" />

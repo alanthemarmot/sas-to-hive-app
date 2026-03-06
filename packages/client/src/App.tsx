@@ -8,6 +8,7 @@ import HiveResults from './components/HiveResults';
 import FileTree from './components/FileTree';
 import FileUpload from './components/FileUpload';
 import Toast, { type ToastMessage } from './components/Toast';
+import PatternLibrary from './components/PatternLibrary';
 import './App.css';
 
 interface HiveResultData {
@@ -28,6 +29,7 @@ export default function App() {
   const [showHiveResults, setShowHiveResults] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [showPatternLibrary, setShowPatternLibrary] = useState(false);
 
   const addToast = useCallback((type: 'success' | 'error', message: string) => {
     const id = `${Date.now()}`;
@@ -37,6 +39,14 @@ export default function App() {
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  const handleLoadPattern = useCallback((sasCode: string) => {
+    setSasCode(sasCode);
+    setHiveSQL('');
+    setExplanation('');
+    setShowPatternLibrary(false);
+    addToast('success', 'Pattern loaded into editor');
+  }, [addToast]);
 
   const handleTranslate = useCallback(async () => {
     if (!sasCode.trim()) return;
@@ -170,6 +180,7 @@ export default function App() {
             onCopy={handleCopy}
             onDownload={handleDownload}
             onExecute={handleExecute}
+            onOpenPatternLibrary={() => setShowPatternLibrary(true)}
             isTranslating={isTranslating}
             hasOutput={!!hiveSQL}
             selectedModel={selectedModel}
@@ -196,6 +207,11 @@ export default function App() {
           )}
         </main>
       </div>
+      <PatternLibrary
+        isVisible={showPatternLibrary}
+        onLoadPattern={handleLoadPattern}
+        onClose={() => setShowPatternLibrary(false)}
+      />
       <Toast toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
