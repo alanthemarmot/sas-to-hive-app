@@ -183,6 +183,48 @@ Apply brand tokens to all existing components:
 
 ---
 
+## Prototype Test Phase
+
+Each of the six planned features will be built as a **standalone prototype** in its own git worktree, running independently on a dedicated port pair. The goal is to be able to demonstrate each feature live — all six worktrees running simultaneously — without any one prototype affecting another.
+
+### Feature Prototype Status
+
+| # | Feature | Branch | Worktree | Ports (server / client) | Status |
+|---|---------|---------|----------|-------------------------|--------|
+| 1 | Conversational follow-up | `feature/conversational-followup` | `../sas-hive-feat-1` | 3011 / 5181 | 🔲 Not started |
+| 2 | Pattern library | `feature/pattern-library` | `../sas-hive-feat-2` | 3012 / 5182 | 🔲 Not started |
+| 3 | Confidence scoring | `feature/confidence-scoring` | `../sas-hive-feat-3` | 3013 / 5183 | 🔲 Not started |
+| 4 | Line mapping | `feature/line-mapping` | `../sas-hive-feat-4` | 3014 / 5184 | 🔲 Not started |
+| 5 | Dialect selector | `feature/dialect-selector` | `../sas-hive-feat-5` | 3015 / 5185 | 🔲 Not started |
+| 6 | Domain context | `feature/domain-context` | `../sas-hive-feat-6` | 3016 / 5186 | 🔲 Not started |
+
+**Status key:** 🔲 Not started · 🔨 In progress · ✅ Demo-ready · ❌ Blocked
+
+### Definition of "Demo-Ready"
+
+A prototype is demo-ready when:
+- `npm install && npm run dev` starts cleanly on its dedicated port pair
+- The feature is visibly working end-to-end in the browser (no placeholders or broken states)
+- TypeScript reports no errors (`tsc --noEmit` on both server and client)
+- A short description of what to show is added to the feature's prompt file under a `## Demo Script` heading
+
+### Demo Setup (All Six Running Simultaneously)
+
+Once all prototypes are demo-ready, start them all from separate terminal tabs:
+
+```bash
+cd ../sas-hive-feat-1 && npm run dev   # http://localhost:5181
+cd ../sas-hive-feat-2 && npm run dev   # http://localhost:5182
+cd ../sas-hive-feat-3 && npm run dev   # http://localhost:5183
+cd ../sas-hive-feat-4 && npm run dev   # http://localhost:5184
+cd ../sas-hive-feat-5 && npm run dev   # http://localhost:5185
+cd ../sas-hive-feat-6 && npm run dev   # http://localhost:5186
+```
+
+The main workspace (`sas-to-hive-app`) continues to run on the default ports (3001 / 5173) as the stable baseline.
+
+---
+
 ## Feature Development with Git Worktrees
 
 Each of the six planned features is specced in its own prompt file under `.github/prompts/`. They are developed and tested in **isolated git worktrees** — separate working directories that share the same repository history. This means each feature can be built, run, and reviewed concurrently without branches interfering with each other, and without stashing or committing half-finished work.
