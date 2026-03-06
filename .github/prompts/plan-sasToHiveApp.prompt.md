@@ -197,6 +197,7 @@ Each of the six planned features will be built as a **standalone prototype** in 
 | 4 | Line mapping | `feature/line-mapping` | `../sas-hive-feat-4` | 3014 / 5184 | 🔲 Not started |
 | 5 | Dialect selector | `feature/dialect-selector` | `../sas-hive-feat-5` | 3015 / 5185 | 🔲 Not started |
 | 6 | Domain context | `feature/domain-context` | `../sas-hive-feat-6` | 3016 / 5186 | 🔲 Not started |
+| 7 | View mode switcher | `feature/view-modes` | `../sas-hive-feat-7` | 3017 / 5187 | 🔲 Not started |
 
 **Status key:** 🔲 Not started · 🔨 In progress · ✅ Demo-ready · ❌ Blocked
 
@@ -219,6 +220,7 @@ cd ../sas-hive-feat-3 && npm run dev   # http://localhost:5183
 cd ../sas-hive-feat-4 && npm run dev   # http://localhost:5184
 cd ../sas-hive-feat-5 && npm run dev   # http://localhost:5185
 cd ../sas-hive-feat-6 && npm run dev   # http://localhost:5186
+cd ../sas-hive-feat-7 && npm run dev   # http://localhost:5187
 ```
 
 The main workspace (`sas-to-hive-app`) continues to run on the default ports (3001 / 5173) as the stable baseline.
@@ -239,6 +241,7 @@ Each of the six planned features is specced in its own prompt file under `.githu
 | 4 | `feature/line-mapping` | `plan-feature-4-line-mapping.prompt.md` | 3014 / 5184 |
 | 5 | `feature/dialect-selector` | `plan-feature-5-dialect-selector.prompt.md` | 3015 / 5185 |
 | 6 | `feature/domain-context` | `plan-feature-6-domain-context.prompt.md` | 3016 / 5186 |
+| 7 | `feature/view-modes` | `plan-feature-7-view-modes.prompt.md` | 3017 / 5187 |
 
 Each worktree runs on its own dedicated port pair so all six can be live simultaneously without conflicts.
 
@@ -257,6 +260,7 @@ git worktree add ../sas-hive-feat-3 -b feature/confidence-scoring
 git worktree add ../sas-hive-feat-4 -b feature/line-mapping
 git worktree add ../sas-hive-feat-5 -b feature/dialect-selector
 git worktree add ../sas-hive-feat-6 -b feature/domain-context
+git worktree add ../sas-hive-feat-7 -b feature/view-modes
 ```
 
 This creates six sibling directories next to the main workspace:
@@ -269,7 +273,8 @@ Documents/workspace/
 ├── sas-hive-feat-3/          ← feature/confidence-scoring
 ├── sas-hive-feat-4/          ← feature/line-mapping
 ├── sas-hive-feat-5/          ← feature/dialect-selector
-└── sas-hive-feat-6/          ← feature/domain-context
+├── sas-hive-feat-6/          ← feature/domain-context
+└── sas-hive-feat-7/          ← feature/view-modes
 ```
 
 Each worktree is a full working copy — open any of them in VS Code as a separate workspace window, or use VS Code's **File → Add Folder to Workspace** to view them in a single multi-root workspace.
