@@ -1,3 +1,5 @@
+import type { TranslationConfidence } from '../lib/sas-static-checks';
+
 export interface FileNode {
   name: string;
   path: string;
@@ -10,7 +12,7 @@ const API_BASE = '/api';
 export async function translateSasToHive(
   sasCode: string,
   model?: string,
-): Promise<{ hiveSQL: string; explanation: string; model: string }> {
+): Promise<{ hiveSQL: string; explanation: string; confidence: TranslationConfidence | null; model: string }> {
   const response = await fetch(`${API_BASE}/translate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

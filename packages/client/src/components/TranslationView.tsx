@@ -1,4 +1,5 @@
 import Editor from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { AlertTriangle } from 'lucide-react';
 import { registerSasLanguage } from '../lib/sas-language.js';
 import './TranslationView.css';
@@ -9,6 +10,7 @@ interface TranslationViewProps {
   hiveSQL: string;
   isTranslating: boolean;
   error: string | null;
+  onHiveEditorReady?: (editor: editor.IStandaloneCodeEditor) => void;
 }
 
 export default function TranslationView({
@@ -17,6 +19,7 @@ export default function TranslationView({
   hiveSQL,
   isTranslating,
   error,
+  onHiveEditorReady,
 }: TranslationViewProps) {
   return (
     <div className="translation-view">
@@ -60,6 +63,7 @@ export default function TranslationView({
               language="sql"
               theme="light"
               value={hiveSQL}
+              onMount={(ed) => onHiveEditorReady?.(ed)}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },

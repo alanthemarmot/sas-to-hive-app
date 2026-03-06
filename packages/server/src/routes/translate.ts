@@ -23,9 +23,9 @@ router.post('/', async (req: Request, res: Response) => {
       maxTokens: 4000,
     });
 
-    const { hiveSQL, explanation } = parseTranslationResponse(response);
+    const { hiveSQL, explanation, confidence } = parseTranslationResponse(response);
 
-    res.json({ hiveSQL, explanation, model: usedModel });
+    res.json({ hiveSQL, explanation, confidence, model: usedModel });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Translation failed';
     console.error('Translation error:', message);

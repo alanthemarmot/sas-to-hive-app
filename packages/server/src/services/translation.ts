@@ -1,5 +1,18 @@
 import type { ChatMessage } from './github-models.js';
 
+export interface TranslationWarning {
+  id: string;
+  severity: 'info' | 'warning' | 'error';
+  sasConstruct: string;
+  message: string;
+  hiveLine: number | null;
+}
+
+export interface TranslationConfidence {
+  confidence: 'high' | 'moderate' | 'low';
+  warnings: TranslationWarning[];
+}
+
 const SYSTEM_PROMPT = `You are an expert SAS programmer and Apache Hive developer performing code migration from SAS to HiveQL (Hive 3.x on Cloudera CDP).
 
 ## Task
@@ -73,6 +86,27 @@ Translate the provided SAS code into equivalent HiveQL. First, briefly explain w
 2. Then provide the HiveQL code in a \`\`\`sql code block
 3. Add comments in the SQL mapping back to original SAS constructs
 4. If any construct cannot be reliably translated, add a \`-- WARNING:\` comment explaining the issue
+5. End with a confidence assessment in a \`\`\`json code block with this exact schema:
+
+\`\`\`json
+{
+  "confidence": "high" | "moderate" | "low",
+  "warnings": [
+    {
+      "id": "llm-1",
+      "severity": "info" | "warning" | "error",
+      "sasConstruct": "string",
+      "message": "string",
+      "hiveLine": number | null
+    }
+  ]
+}
+\`\`\`
+
+Confidence levels:
+- "high": Pattern is well-understood and deterministic. Translation is very likely correct.
+- "moderate": Translation is plausible but involves ambiguity that depends on runtime context.
+- "low": Pattern has no clean Hive equivalent, or the construct is inherently non-deterministic in translation.
 
 ## Important
 - Do NOT guess at translations you are unsure of — flag them with WARNING comments
@@ -93,7 +127,11 @@ export function buildTranslationPrompt(sasCode: string): ChatMessage[] {
   ];
 }
 
-export function parseTranslationResponse(response: string): { hiveSQL: string; explanation: string } {
+export function parseTranslationResponse(response: string): {
+  hiveSQL: string;
+  explanation: string;
+  confidence: TranslationConfidence | null;
+} {
   let explanation = '';
   let hiveSQL = '';
 
@@ -136,5 +174,19 @@ export function parseTranslationResponse(response: string): { hiveSQL: string; e
     }
   }
 
-  return { hiveSQL, explanation };
+  // Extract JSON confidence block
+  const jsonMatch = response.match(/```json\s*\n([\s\S]*?)```/);
+  let confidence: TranslationConfidence | null = null;
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[1]);
+      if (parsed && typeof parsed.confidence === 'string' && Array.isArray(parsed.warnings)) {
+        confidence = parsed as TranslationConfidence;
+      }
+    } catch {
+      confidence = null;
+    }
+  }
+
+  return { hiveSQL, explanation, confidence };
 }

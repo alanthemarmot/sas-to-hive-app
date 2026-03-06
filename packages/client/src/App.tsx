@@ -1,12 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import type { editor } from 'monaco-editor';
 import { streamTranslation, executeHiveQuery } from './api/client';
+import { runStaticChecks, type TranslationConfidence } from './lib/sas-static-checks';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
 import ExplanationPanel from './components/ExplanationPanel';
 import HiveResults from './components/HiveResults';
 import FileTree from './components/FileTree';
 import FileUpload from './components/FileUpload';
+import ConfidencePanel from './components/ConfidencePanel';
 import Toast, { type ToastMessage } from './components/Toast';
 import './App.css';
 
@@ -28,6 +31,8 @@ export default function App() {
   const [showHiveResults, setShowHiveResults] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [confidence, setConfidence] = useState<TranslationConfidence | null>(null);
+  const hiveEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
   const addToast = useCallback((type: 'success' | 'error', message: string) => {
     const id = `${Date.now()}`;
@@ -45,6 +50,19 @@ export default function App() {
     setExplanation('');
     setError(null);
     setHiveResults(null);
+
+    // Run static checks immediately — gives instant feedback before LLM responds
+    const immediateWarnings = runStaticChecks(sasCode);
+    setConfidence(
+      immediateWarnings.length > 0
+        ? {
+            confidence: immediateWarnings.some((w) => w.severity === 'error')
+              ? 'low'
+              : 'moderate',
+            warnings: immediateWarnings,
+          }
+        : null,
+    );
 
     try {
       let fullOutput = '';
@@ -84,6 +102,33 @@ export default function App() {
       } else {
         setHiveSQL(fullOutput.trim());
       }
+
+      // Extract LLM confidence from the JSON block and merge with static checks
+      const jsonMatch = fullOutput.match(/```json\s*\n([\s\S]*?)```/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[1]);
+          if (parsed && typeof parsed.confidence === 'string' && Array.isArray(parsed.warnings)) {
+            const llmWarnings = parsed.warnings as TranslationConfidence['warnings'];
+            // Merge: keep static checks, add LLM-only warnings (avoid duplicates by id)
+            const staticIds = new Set(immediateWarnings.map((w) => w.id));
+            const merged = [
+              ...immediateWarnings,
+              ...llmWarnings.filter((w) => !staticIds.has(w.id)),
+            ];
+            const hasError = merged.some((w) => w.severity === 'error');
+            setConfidence({
+              confidence: hasError ? 'low' : parsed.confidence,
+              warnings: merged,
+            });
+          }
+        } catch {
+          // LLM JSON malformed — keep static checks only
+        }
+      }
+
+      // Strip the JSON block from the displayed SQL if it leaked through
+      setHiveSQL((prev) => prev.replace(/```json\s*\n[\s\S]*?```/g, '').trim());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Translation failed');
     } finally {
@@ -139,6 +184,12 @@ export default function App() {
     }
   };
 
+  const handleWarningLineClick = useCallback((line: number) => {
+    hiveEditorRef.current?.revealLineInCenter(line);
+    hiveEditorRef.current?.setPosition({ lineNumber: line, column: 1 });
+    hiveEditorRef.current?.focus();
+  }, []);
+
   return (
     <div className="app">
       <a href="#main-content" className="skip-link">Skip to main content</a>
@@ -181,6 +232,12 @@ export default function App() {
             hiveSQL={hiveSQL}
             isTranslating={isTranslating}
             error={error}
+            onHiveEditorReady={(ed) => { hiveEditorRef.current = ed; }}
+          />
+          <ConfidencePanel
+            confidence={confidence}
+            isTranslating={isTranslating}
+            onWarningLineClick={handleWarningLineClick}
           />
           {showExplanation && explanation && (
             <ExplanationPanel
