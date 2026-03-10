@@ -14,15 +14,17 @@ echo ""
 
 # Kill any stale processes on the feature ports
 echo "▸ Clearing ports..."
-for port in 3001 3011 3012 3013 3014 3015 3016 3017 5173 5181 5182 5183 5184 5185 5186 5187; do
-  lsof -ti :"$port" | xargs kill -9 2>/dev/null || true
-done
+npx kill-port 3001 3011 3012 3013 3014 3015 3016 3017 5173 5181 5182 5183 5184 5185 5186 5187 2>/dev/null || true
 echo "  Ports cleared."
 echo ""
 
 # Open the demo navigator immediately (servers take a few seconds to start)
 echo "▸ Opening demo navigator..."
-open "$ROOT/demo/index.html"
+case "$OSTYPE" in
+  msys*|cygwin*|win32*) start "" "$ROOT/demo/index.html" ;;
+  darwin*)              open "$ROOT/demo/index.html" ;;
+  *)                    xdg-open "$ROOT/demo/index.html" ;;
+esac
 echo ""
 
 echo "▸ Starting main app + all 7 feature servers (this terminal stays live)..."

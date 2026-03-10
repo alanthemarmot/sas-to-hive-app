@@ -87,21 +87,36 @@ HiveQL code
 
 ## Feature Development Workflow (Git Worktrees)
 
-Planned features are developed in isolated git worktrees as sibling directories:
+All 7 features are built as isolated git worktrees inside the `.trees/` directory:
 
 ```
-Documents/workspace/
-├── sas-to-hive-app/     # main / trunk (ports 3001 / 5173)
-├── sas-hive-feat-1/     # feature/conversational-followup (3011 / 5181)
-├── sas-hive-feat-2/     # feature/pattern-library (3012 / 5182)
-├── sas-hive-feat-3/     # feature/confidence-scoring (3013 / 5183)
-├── sas-hive-feat-4/     # feature/line-mapping (3014 / 5184)
-├── sas-hive-feat-5/     # feature/dialect-selector (3015 / 5185)
-├── sas-hive-feat-6/     # feature/domain-context (3016 / 5186)
-└── sas-hive-feat-7/     # feature/view-modes (3017 / 5187)
+sas-to-hive-app/
+├── .trees/
+│   ├── feat-1/    # feature/conversational-followup (ports 3011 / 5181)
+│   ├── feat-2/    # feature/pattern-library (3012 / 5182)
+│   ├── feat-3/    # feature/confidence-scoring (3013 / 5183)
+│   ├── feat-4/    # feature/line-mapping (3014 / 5184)
+│   ├── feat-5/    # feature/dialect-selector (3015 / 5185)
+│   ├── feat-6/    # feature/domain-context (3016 / 5186)
+│   └── feat-7/    # feature/view-modes (3017 / 5187)
+├── demo/
+│   └── index.html # demo navigator (status dashboard + links)
+├── packages/
+│   ├── client/    # main app (port 5173)
+│   └── server/    # main app (port 3001)
+└── scripts/
+    ├── start-demo.sh
+    └── stop-demo.sh
 ```
 
-Each worktree needs its own `npm install` and its own `.env` with the correct `PORT` and `VITE_PORT`. Feature plans are in `.github/prompts/plan-feature-N-*.prompt.md`. The master workflow is documented in `.github/prompts/plan-sasToHiveApp.prompt.md`.
+Each worktree has its own `npm install` and `.env` with the correct `PORT` and `VITE_PORT`. Feature plans are in `.github/prompts/plan-feature-N-*.prompt.md`.
+
+**Demo commands** (run from workspace root):
+```bash
+npm run demo        # start all 8 servers + open demo/index.html
+npm run demo:stop   # kill all demo server processes
+npm run demo:open   # open demo/index.html without restarting servers
+```
 
 When working in a feature worktree, the `vite.config.ts` proxy target must point to the worktree's server port (not 3001).
 

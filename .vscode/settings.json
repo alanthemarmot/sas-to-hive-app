@@ -10,6 +10,9 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "mkdir": true
+        "mkdir": true,
+        "ForEach-Object": true,
+        "1..7": true,
+        "git add": true
     }
 }
