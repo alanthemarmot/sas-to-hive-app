@@ -10,6 +10,15 @@
             "approve": true,
             "matchCommandLine": true
         },
-        "mkdir": true
+        "mkdir": true,
+<<<<<<< Updated upstream
+        "ForEach-Object": true,
+        "1..7": true,
+        "git add": true
+=======
+        "git merge": true,
+        "git rev-list": true,
+        "git -C /Users/alan/Documents/workspace/sas-to-hive-app": true
+>>>>>>> Stashed changes
     }
 }

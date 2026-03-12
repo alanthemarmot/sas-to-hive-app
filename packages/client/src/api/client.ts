@@ -9,7 +9,7 @@ export interface FileNode {
 
 const API_BASE = '/api';
 
-export async function translateSasToHive(
+export async function translateSasToBigQuery(
   sasCode: string,
   model?: string,
 ): Promise<{ hiveSQL: string; explanation: string; confidence: TranslationConfidence | null; model: string }> {
@@ -118,7 +118,7 @@ export async function uploadFile(file: File): Promise<{ name: string; content: s
   return response.json();
 }
 
-export async function executeHiveQuery(
+export async function executeBigQueryQuery(
   query: string,
 ): Promise<{ columns: string[]; rows: any[][]; message: string }> {
   const response = await fetch(`${API_BASE}/hive/execute`, {
@@ -128,7 +128,7 @@ export async function executeHiveQuery(
   });
   if (!response.ok) {
     const err = await response.json().catch(() => ({ error: response.statusText }));
-    throw new Error(err.error || 'Hive execution failed');
+    throw new Error(err.error || 'BigQuery execution failed');
   }
   return response.json();
 }
