@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import Editor from '@monaco-editor/react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Lock, Unlock, X } from 'lucide-react';
 import { registerSasLanguage } from '../lib/sas-language.js';
 import './TranslationView.css';
 
@@ -13,19 +14,25 @@ interface TranslationViewProps {
   sasCode: string;
   onSasCodeChange: (value: string) => void;
   hiveSQL: string;
+  onHiveSQLChange?: (value: string) => void;
   isTranslating: boolean;
   error: string | null;
   dialect: string;
+  onClearError?: () => void;
 }
 
 export default function TranslationView({
   sasCode,
   onSasCodeChange,
   hiveSQL,
+  onHiveSQLChange,
   isTranslating,
   error,
   dialect,
+  onClearError,
 }: TranslationViewProps) {
+  const [isLocked, setIsLocked] = useState(true);
+
   return (
     <div className="translation-view">
       {/* SAS Input Panel */}
@@ -51,13 +58,31 @@ export default function TranslationView({
         </div>
       </div>
 
-      {/* Hive Output Panel */}
+      {/* BigQuery SQL Output Panel */}
       <div className={`editor-panel${isTranslating && hiveSQL ? ' editor-panel--streaming' : ''}`}>
-        <div className="editor-panel-header">{OUTPUT_LABELS[dialect] ?? 'SQL Output'}</div>
+        <div className="editor-panel-header editor-panel-header--with-actions">
+          {OUTPUT_LABELS[dialect] ?? 'SQL Output'}
+          <button
+            className="editor-lock-toggle"
+            onClick={() => setIsLocked((v) => !v)}
+            aria-label={isLocked ? 'Unlock SQL editor' : 'Lock SQL editor'}
+            title={isLocked ? 'Unlock to edit SQL before running' : 'Lock SQL editor'}
+          >
+            {isLocked ? <Lock size={12} /> : <Unlock size={12} />}
+          </button>
+        </div>
         {error && (
           <div className="error-banner" role="alert">
             <AlertTriangle size={13} aria-hidden="true" />
-            {error}
+            <span className="error-banner-text">{error}</span>
+            <button
+              className="error-banner-dismiss"
+              onClick={onClearError}
+              aria-label="Dismiss error"
+              title="Dismiss"
+            >
+              <X size={13} />
+            </button>
           </div>
         )}
         <div className="editor-container">
@@ -68,8 +93,9 @@ export default function TranslationView({
               language="sql"
               theme="light"
               value={hiveSQL}
+              onChange={isLocked ? undefined : (v) => onHiveSQLChange?.(v ?? '')}
               options={{
-                readOnly: true,
+                readOnly: isLocked,
                 minimap: { enabled: false },
                 lineNumbers: 'on',
                 fontSize: 13,

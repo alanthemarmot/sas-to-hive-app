@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { streamTranslation, executeHiveQuery } from './api/client';
+import { streamTranslation, executeBigQueryQuery } from './api/client';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
 import ExplanationPanel from './components/ExplanationPanel';
@@ -137,14 +137,15 @@ export default function App() {
 
   const handleExecute = async () => {
     if (!hiveSQL) return;
+    setError(null);
     try {
-      const results = await executeHiveQuery(hiveSQL);
+      const results = await executeBigQueryQuery(hiveSQL);
       setHiveResults(results);
       setShowHiveResults(true);
       addToast('success', 'Query executed successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hive execution failed');
-      addToast('error', err instanceof Error ? err.message : 'Hive execution failed');
+      setError(err instanceof Error ? err.message : 'BigQuery execution failed');
+      addToast('error', err instanceof Error ? err.message : 'BigQuery execution failed');
     }
   };
 
@@ -196,9 +197,11 @@ export default function App() {
             sasCode={sasCode}
             onSasCodeChange={setSasCode}
             hiveSQL={hiveSQL}
+            onHiveSQLChange={setHiveSQL}
             isTranslating={isTranslating}
             error={error}
             dialect={selectedDialect}
+            onClearError={() => setError(null)}
           />
           {showExplanation && explanation && (
             <ExplanationPanel

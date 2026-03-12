@@ -189,33 +189,31 @@ export function buildTranslationPrompt(
     },
   ];
 }
-
-export function parseTranslationResponse(response: string): { hiveSQL: string; explanation: string } {
+ 
+export function parseTranslationResponse(response: string): { sql: string; explanation: string } {
   let explanation = '';
-  let hiveSQL = '';
-
+  let sql = '';
+ 
   // Extract explanation from markers
   const explanationMatch = response.match(
     /<!--\s*EXPLANATION_START\s*-->([\s\S]*?)<!--\s*EXPLANATION_END\s*-->/i
   );
-
+ 
   if (explanationMatch) {
     explanation = explanationMatch[1].trim();
   }
-
+ 
   // Extract SQL from code block
   const sqlMatch = response.match(/```sql\s*\n([\s\S]*?)```/);
   if (sqlMatch) {
-    hiveSQL = sqlMatch[1].trim();
+    sql = sqlMatch[1].trim();
   }
-
+ 
   // Fallback: if no markers found, use the whole response as explanation
   if (!explanation) {
-    // Try to split on the code block — everything before is explanation
     const codeBlockIndex = response.indexOf('```sql');
     if (codeBlockIndex !== -1) {
       explanation = response.slice(0, codeBlockIndex).trim();
-      // Clean up any HTML comment markers or artifacts
       explanation = explanation
         .replace(/<!--\s*EXPLANATION_START\s*-->/gi, '')
         .replace(/<!--\s*EXPLANATION_END\s*-->/gi, '')
@@ -224,14 +222,14 @@ export function parseTranslationResponse(response: string): { hiveSQL: string; e
       explanation = response;
     }
   }
-
+ 
   // Fallback: if still no SQL, try any code block
-  if (!hiveSQL) {
+  if (!sql) {
     const anyCodeBlock = response.match(/```\w*\s*\n([\s\S]*?)```/);
     if (anyCodeBlock) {
-      hiveSQL = anyCodeBlock[1].trim();
+      sql = anyCodeBlock[1].trim();
     }
   }
-
-  return { hiveSQL, explanation };
+ 
+  return { sql, explanation };
 }
