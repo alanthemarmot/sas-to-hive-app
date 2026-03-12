@@ -43,9 +43,9 @@ export default function TranslationView({
         </div>
       </div>
 
-      {/* Hive Output Panel */}
+      {/* BigQuery SQL Output Panel */}
       <div className={`editor-panel${isTranslating && hiveSQL ? ' editor-panel--streaming' : ''}`}>
-        <div className="editor-panel-header">Hive Output</div>
+        <div className="editor-panel-header">BigQuery SQL Output</div>
         {error && (
           <div className="error-banner" role="alert">
             <AlertTriangle size={13} aria-hidden="true" />

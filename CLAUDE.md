@@ -30,7 +30,7 @@ No test suite exists yet.
 Copy `.env.example` to `.env` in the workspace root and set:
 - `GITHUB_PAT` — required; GitHub fine-grained PAT used to call the GitHub Models API
 - `PORT` — optional; Express server port (default: 3001)
-- `HIVE_JDBC_URL` — optional; if unset the Hive execution endpoint returns mock results
+- `GOOGLE_CLOUD_PROJECT` — optional; if unset the BigQuery execution endpoint returns mock results
 
 The server loads `.env` from the workspace root via `dotenv` (`resolve(__dirname, '../../../.env')`).
 
@@ -46,12 +46,12 @@ API endpoints:
 - `GET /api/files` — returns mock directory tree
 - `GET /api/files/content/:path` — returns content of a mock `.sas` file
 - `POST /api/files/upload` — accepts `.sas` file upload via `multer`
-- `POST /api/hive/execute` — executes HiveQL (mock; real JDBC configurable)
+- `POST /api/hive/execute` — executes BigQuery SQL (mock; real BigQuery configurable)
 - `GET /api/health`
 
 Key service layer:
 - `services/github-models.ts` — thin `fetch` wrapper for `https://models.github.ai/inference/chat/completions`; exports `chatCompletion` (non-streaming) and `chatCompletionStream` (async generator yielding tokens)
-- `services/translation.ts` — contains the system prompt with SAS→Hive translation rules, and `buildTranslationPrompt` / `parseTranslationResponse` helpers
+- `services/translation.ts` — contains the system prompt with SAS→BigQuery translation rules, and `buildTranslationPrompt` / `parseTranslationResponse` helpers
 - `services/mock-files.ts` — in-memory directory tree and file contents for the file browser (no disk reads)
 
 ### `packages/client` — React + Vite + TypeScript
@@ -59,9 +59,9 @@ Key service layer:
 Vite proxies all `/api/*` requests to `http://localhost:3001`.
 
 Component hierarchy:
-- `App.tsx` — root state (sasCode, hiveSQL, explanation, theme, toasts); orchestrates streaming via `streamTranslation` from `api/client.ts`
-- `TranslationView.tsx` — side-by-side Monaco editors (SAS input editable, Hive output read-only)
-- `Toolbar.tsx` — Translate, Copy, Download, Execute buttons + model selector dropdown
+- `App.tsx` — root state (sasCode, sql, explanation, theme, toasts); orchestrates streaming via `streamTranslation` from `api/client.ts`
+- `TranslationView.tsx` — side-by-side Monaco editors (SAS input editable, BigQuery SQL output read-only)
+- `Toolbar.tsx` — Translate, Copy, Download, Run buttons + model selector dropdown
 - `ExplanationPanel.tsx` — collapsible panel for the plain-English explanation
 - `HiveResults.tsx` — tabular mock query results
 - `FileTree.tsx` — sidebar file browser (loads mock `.sas` files into editor)
@@ -80,7 +80,7 @@ The LLM response uses HTML comment markers to delimit sections:
 plain-English explanation
 <!-- EXPLANATION_END -->
 ```sql
-HiveQL code
+BigQuery SQL code
 ```
 ```
 `App.tsx` parses these markers in real-time during streaming to split explanation and SQL into separate state values.
@@ -123,7 +123,7 @@ When working in a feature worktree, the `vite.config.ts` proxy target must point
 ## Key Conventions
 
 - Default LLM model: `openai/gpt-4.1-mini` (GitHub Models API — only OpenAI/Meta/Microsoft/DeepSeek/xAI models are available, not Anthropic)
-- All created Hive tables use `STORED AS ORC` by default
+- BigQuery uses native columnar storage — no `STORED AS ORC` or other storage format clauses
 - Translation temperature is fixed at `0.2` for deterministic output
 - Theme (light/dark) is stored in `localStorage` under key `sas-hive-theme` and applied via `data-theme` attribute on `<html>`
 - Branding uses Revenue Commissioners (Ireland) identity; CSS tokens are in `index.css` under `--rc-*` custom properties

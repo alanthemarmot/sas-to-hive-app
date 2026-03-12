@@ -471,6 +471,50 @@ A toggle button in the header (near the theme toggle) that strips the interface 
 
 ---
 
+### G2. BigQuery SQL Autocomplete in Editor (Future)
+
+**Type:** Future enhancement (backlog)  
+**Effort:** Low for baseline (0.5–1 day), Medium for schema-aware mode (2–5 days)  
+**Depends on:** Monaco editor integration already in place  
+**Status:** Not planned for current phase — capture for later implementation
+
+#### Goal
+
+Improve editing speed and SQL accuracy by adding autocomplete to the BigQuery output editor when it is unlocked for manual edits.
+
+#### Scope (phased)
+
+**Phase 1 — Baseline autocomplete (quick win):**
+- Enable Monaco suggest/intellisense options for SQL editing experience
+- Add BigQuery-focused keyword and function suggestions (e.g. `SAFE_CAST`, `SAFE_DIVIDE`, `ARRAY_AGG`, `STRUCT`, `UNNEST`, `QUALIFY`)
+- Add snippet-style completions for common templates (`WITH ... AS (...)`, window functions, `CREATE TABLE AS SELECT`)
+
+**Phase 2 — Schema-aware autocomplete (optional):**
+- Add dataset/table/column suggestions from available metadata
+- Suggest join keys and column names contextually after `FROM`/`JOIN`
+- Keep fallback to static suggestions when metadata is unavailable
+
+#### Implementation Notes
+
+- Register a custom Monaco completion provider for SQL in the client
+- Trigger suggestions only when SQL editor is unlocked (`isSqlEditorUnlocked`)
+- Keep this enhancement client-side first; defer backend metadata endpoints until needed
+
+#### Candidate Files
+
+- `packages/client/src/components/TranslationView.tsx`
+- `packages/client/src/lib/bigquery-completions.ts` (new)
+- `packages/client/src/lib/monaco-sql.ts` (new, optional)
+
+#### Acceptance Criteria (future)
+
+- Pressing `Ctrl+Space` in unlocked SQL editor shows relevant BigQuery suggestions
+- Common BigQuery functions and snippets appear with helpful descriptions
+- No impact on read-only mode or translation streaming performance
+- No TypeScript errors
+
+---
+
 ### H. Containerisation + Cloud Run Deployment (GCP Phases 3–6)
 
 **Status:** Not started  

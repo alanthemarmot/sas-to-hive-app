@@ -29,6 +29,42 @@
   flex-shrink: 0;
 }
 
+.editor-panel-header--with-actions {
+  justify-content: space-between;
+}
+
+.editor-lock-toggle {
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  line-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.editor-lock-toggle svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  display: block;
+}
+
+.editor-lock-toggle:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.editor-lock-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .editor-container {
   flex: 1;
   overflow: hidden;

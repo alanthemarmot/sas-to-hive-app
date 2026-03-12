@@ -34,7 +34,7 @@ export default function Toolbar({
         onClick={onTranslate}
         disabled={isTranslating}
         title="Translate (⌘Enter)"
-        aria-label="Translate SAS to Hive SQL"
+        aria-label="Translate SAS to BigQuery SQL"
       >
         {isTranslating ? <span className="spinner" aria-hidden="true" /> : <ArrowRightLeft size={14} aria-hidden="true" />}
         {isTranslating ? 'Translating…' : 'Translate'}
@@ -46,7 +46,7 @@ export default function Toolbar({
         className="toolbar-btn btn-secondary"
         onClick={onCopy}
         disabled={!hasOutput}
-        aria-label="Copy Hive SQL to clipboard"
+        aria-label="Copy BigQuery SQL to clipboard"
         title="Copy to clipboard"
       >
         <Copy size={14} aria-hidden="true" />
@@ -57,22 +57,22 @@ export default function Toolbar({
         className="toolbar-btn btn-secondary"
         onClick={onDownload}
         disabled={!hasOutput}
-        aria-label="Download as .hql file"
-        title="Download .hql"
+        aria-label="Download as .sql file"
+        title="Download .sql"
       >
         <Download size={14} aria-hidden="true" />
-        Download .hql
+        Download .sql
       </button>
 
       <button
         className="toolbar-btn btn-secondary"
         onClick={onExecute}
         disabled={!hasOutput}
-        aria-label="Execute translated SQL on Hive"
-        title="Execute on Hive"
+        aria-label="Run translated SQL on BigQuery"
+        title="Run on BigQuery"
       >
         <Play size={14} aria-hidden="true" />
-        Execute on Hive
+        Run on BigQuery
       </button>
 
       <div className="toolbar-spacer" />
