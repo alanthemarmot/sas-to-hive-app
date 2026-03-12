@@ -185,19 +185,19 @@ Apply brand tokens to all existing components:
 
 ## Prototype Test Phase
 
-Each of the six planned features will be built as a **standalone prototype** in its own git worktree, running independently on a dedicated port pair. The goal is to be able to demonstrate each feature live — all six worktrees running simultaneously — without any one prototype affecting another.
+All seven planned features are built as **standalone prototypes**, each in its own git worktree, running independently on a dedicated port pair. All seven can be demonstrated live simultaneously without any one prototype affecting another.
 
 ### Feature Prototype Status
 
 | # | Feature | Branch | Worktree | Ports (server / client) | Status |
 |---|---------|---------|----------|-------------------------|--------|
-| 1 | Conversational follow-up | `feature/conversational-followup` | `../sas-hive-feat-1` | 3011 / 5181 | 🔲 Not started |
-| 2 | Pattern library | `feature/pattern-library` | `../sas-hive-feat-2` | 3012 / 5182 | 🔲 Not started |
-| 3 | Confidence scoring | `feature/confidence-scoring` | `../sas-hive-feat-3` | 3013 / 5183 | 🔲 Not started |
-| 4 | Line mapping | `feature/line-mapping` | `../sas-hive-feat-4` | 3014 / 5184 | 🔲 Not started |
-| 5 | Dialect selector | `feature/dialect-selector` | `../sas-hive-feat-5` | 3015 / 5185 | 🔲 Not started |
-| 6 | Domain context | `feature/domain-context` | `../sas-hive-feat-6` | 3016 / 5186 | 🔲 Not started |
-| 7 | View mode switcher | `feature/view-modes` | `../sas-hive-feat-7` | 3017 / 5187 | 🔲 Not started |
+| 1 | Conversational follow-up | `feature/conversational-followup` | `.trees/feat-1` | 3011 / 5181 | ✅ Demo-ready (10 Mar 2026) |
+| 2 | Pattern library | `feature/pattern-library` | `.trees/feat-2` | 3012 / 5182 | ✅ Demo-ready (10 Mar 2026) |
+| 3 | Confidence scoring | `feature/confidence-scoring` | `.trees/feat-3` | 3013 / 5183 | ✅ Demo-ready (10 Mar 2026) |
+| 4 | Line mapping | `feature/line-mapping` | `.trees/feat-4` | 3014 / 5184 | ✅ Demo-ready (10 Mar 2026) |
+| 5 | Dialect selector | `feature/dialect-selector` | `.trees/feat-5` | 3015 / 5185 | ✅ Demo-ready (10 Mar 2026) |
+| 6 | Domain context | `feature/domain-context` | `.trees/feat-6` | 3016 / 5186 | ✅ Demo-ready (10 Mar 2026) |
+| 7 | View mode switcher | `feature/view-modes` | `.trees/feat-7` | 3017 / 5187 | ✅ Demo-ready (10 Mar 2026) |
 
 **Status key:** 🔲 Not started · 🔨 In progress · ✅ Demo-ready · ❌ Blocked
 
@@ -209,15 +209,25 @@ A prototype is demo-ready when:
 - TypeScript reports no errors (`tsc --noEmit` on both server and client)
 - A short description of what to show is added to the feature's prompt file under a `## Demo Script` heading
 
-### Demo Setup (All Six Running Simultaneously)
+### Demo Setup (All Seven Running Simultaneously)
 
-Once all prototypes are demo-ready, start them all from separate terminal tabs:
+All prototypes are demo-ready. Start all eight servers (main + 7 features) and open the demo navigator with a single command:
 
 ```bash
-cd ../sas-hive-feat-1 && npm run dev   # http://localhost:5181
-cd ../sas-hive-feat-2 && npm run dev   # http://localhost:5182
-cd ../sas-hive-feat-3 && npm run dev   # http://localhost:5183
-cd ../sas-hive-feat-4 && npm run dev   # http://localhost:5184
+npm run demo          # starts all servers + opens demo/index.html in the browser
+npm run demo:stop     # kills all demo server processes
+npm run demo:open     # re-open demo/index.html without restarting servers
+```
+
+The demo navigator (`demo/index.html`) shows a card for each feature with a live status indicator that pings each server's `/api/health` endpoint — green dot = running, red = down. Click **Open** on any card to launch that prototype in a new tab.
+
+Alternatively, start individual worktrees manually:
+
+```bash
+cd .trees/feat-1 && npm run dev   # http://localhost:5181
+cd .trees/feat-2 && npm run dev   # http://localhost:5182
+cd .trees/feat-3 && npm run dev   # http://localhost:5183
+cd .trees/feat-4 && npm run dev   # http://localhost:5184
 cd ../sas-hive-feat-5 && npm run dev   # http://localhost:5185
 cd ../sas-hive-feat-6 && npm run dev   # http://localhost:5186
 cd ../sas-hive-feat-7 && npm run dev   # http://localhost:5187
@@ -229,7 +239,7 @@ The main workspace (`sas-to-hive-app`) continues to run on the default ports (30
 
 ## Feature Development with Git Worktrees
 
-Each of the six planned features is specced in its own prompt file under `.github/prompts/`. They are developed and tested in **isolated git worktrees** — separate working directories that share the same repository history. This means each feature can be built, run, and reviewed concurrently without branches interfering with each other, and without stashing or committing half-finished work.
+Each of the seven planned features is specced in its own prompt file under `.github/prompts/`. They are developed and tested in **isolated git worktrees** inside the `.trees/` directory — separate working directories that share the same repository history. This means each feature can be built, run, and reviewed concurrently without branches interfering with each other, and without stashing or committing half-finished work.
 
 ### Feature Branches & Prompt Files
 
@@ -243,38 +253,41 @@ Each of the six planned features is specced in its own prompt file under `.githu
 | 6 | `feature/domain-context` | `plan-feature-6-domain-context.prompt.md` | 3016 / 5186 |
 | 7 | `feature/view-modes` | `plan-feature-7-view-modes.prompt.md` | 3017 / 5187 |
 
-Each worktree runs on its own dedicated port pair so all six can be live simultaneously without conflicts.
+Each worktree runs on its own dedicated port pair so all seven can be live simultaneously without conflicts.
 
 ---
 
 ### One-Time Setup
 
-Run once from the repository root to create all six worktrees and their branches:
+All seven worktrees are already created. The setup script is at `scripts/setup-worktrees.sh`. The worktrees live inside the `.trees/` directory in the main workspace:
+
+```
+sas-to-hive-app/
+├── .trees/
+│   ├── feat-1/          ← feature/conversational-followup  (ports 3011 / 5181)
+│   ├── feat-2/          ← feature/pattern-library           (ports 3012 / 5182)
+│   ├── feat-3/          ← feature/confidence-scoring        (ports 3013 / 5183)
+│   ├── feat-4/          ← feature/line-mapping              (ports 3014 / 5184)
+│   ├── feat-5/          ← feature/dialect-selector          (ports 3015 / 5185)
+│   ├── feat-6/          ← feature/domain-context            (ports 3016 / 5186)
+│   └── feat-7/          ← feature/view-modes                (ports 3017 / 5187)
+├── packages/
+│   ├── client/
+│   └── server/
+└── demo/
+    └── index.html       ← demo navigator dashboard
+```
+
+To recreate them from scratch (if worktrees are removed):
 
 ```bash
-# From: /Users/alan/Documents/workspace/sas-to-hive-app
-
-git worktree add ../sas-hive-feat-1 -b feature/conversational-followup
-git worktree add ../sas-hive-feat-2 -b feature/pattern-library
-git worktree add ../sas-hive-feat-3 -b feature/confidence-scoring
-git worktree add ../sas-hive-feat-4 -b feature/line-mapping
-git worktree add ../sas-hive-feat-5 -b feature/dialect-selector
-git worktree add ../sas-hive-feat-6 -b feature/domain-context
-git worktree add ../sas-hive-feat-7 -b feature/view-modes
-```
-
-This creates six sibling directories next to the main workspace:
-
-```
-Documents/workspace/
-├── sas-to-hive-app/          ← main / trunk
-├── sas-hive-feat-1/          ← feature/conversational-followup
-├── sas-hive-feat-2/          ← feature/pattern-library
-├── sas-hive-feat-3/          ← feature/confidence-scoring
-├── sas-hive-feat-4/          ← feature/line-mapping
-├── sas-hive-feat-5/          ← feature/dialect-selector
-├── sas-hive-feat-6/          ← feature/domain-context
-└── sas-hive-feat-7/          ← feature/view-modes
+git worktree add .trees/feat-1 -b feature/conversational-followup
+git worktree add .trees/feat-2 -b feature/pattern-library
+git worktree add .trees/feat-3 -b feature/confidence-scoring
+git worktree add .trees/feat-4 -b feature/line-mapping
+git worktree add .trees/feat-5 -b feature/dialect-selector
+git worktree add .trees/feat-6 -b feature/domain-context
+git worktree add .trees/feat-7 -b feature/view-modes
 ```
 
 Each worktree is a full working copy — open any of them in VS Code as a separate workspace window, or use VS Code's **File → Add Folder to Workspace** to view them in a single multi-root workspace.
@@ -285,14 +298,14 @@ Each worktree is a full working copy — open any of them in VS Code as a separa
 
 Each worktree needs its own port pair to avoid conflicts. Create a `.env` file in each worktree root:
 
-**`../sas-hive-feat-1/.env`**
+**`.trees/feat-1/.env`**
 ```
 GITHUB_PAT=github_pat_xxxxx
 PORT=3011
 VITE_PORT=5181
 ```
 
-Repeat with the port numbers from the table above for features 2–6. The `GITHUB_PAT` value is the same for all worktrees.
+Repeat with the port numbers from the table above for features 2–7. All worktree `.env` files are already populated. The `GITHUB_PAT` value is the same for all worktrees.
 
 To make Vite respect `VITE_PORT`, update `packages/client/vite.config.ts` in each worktree (or do this once on `main` before creating the worktrees):
 
@@ -311,11 +324,11 @@ export default defineConfig({
 
 ### Per-Feature Workflow
 
-For each feature (replace `N` and `feat-N` with the feature number):
+For each feature (replace `N` with the feature number):
 
 ```bash
 # 1. Install dependencies (node_modules are not shared across worktrees)
-cd ../sas-hive-feat-N
+cd .trees/feat-N
 npm install
 
 # 2. Start the dev servers
@@ -357,7 +370,7 @@ git commit -m "feat: conversational follow-up chat panel"
 After merging, remove the worktree and delete the branch:
 
 ```bash
-git worktree remove ../sas-hive-feat-1
+git worktree remove .trees/feat-1
 git branch -d feature/conversational-followup
 ```
 
@@ -370,9 +383,9 @@ git branch -d feature/conversational-followup
 git worktree list
 
 # Typical output:
-# /Users/alan/Documents/workspace/sas-to-hive-app   abc1234 [main]
-# /Users/alan/Documents/workspace/sas-hive-feat-1   abc1234 [feature/conversational-followup]
-# /Users/alan/Documents/workspace/sas-hive-feat-2   abc1234 [feature/pattern-library]
+# /path/to/sas-to-hive-app                    abc1234 [main]
+# /path/to/sas-to-hive-app/.trees/feat-1      abc1234 [feature/conversational-followup]
+# /path/to/sas-to-hive-app/.trees/feat-2      abc1234 [feature/pattern-library]
 # ...
 ```
 
@@ -383,6 +396,6 @@ git worktree list
 - **`node_modules` are not shared** — run `npm install` in each worktree after creation. This is expected; each worktree is fully independent.
 - **`.env` files are not tracked by git** — copy or recreate `.env` in each worktree. They will not be present after `git worktree add`.
 - **You cannot check out the same branch in two worktrees simultaneously** — git enforces this. If you try, you'll get a `fatal: branch is already checked out` error. Use a different branch name per worktree.
-- **VS Code workspaces** — open each worktree as a separate VS Code window (`code ../sas-hive-feat-N`) to get independent terminal sessions, debug configurations, and extension states.
+- **VS Code workspaces** — open each worktree as a separate VS Code window (`code .trees/feat-N`) to get independent terminal sessions, debug configurations, and extension states.
 - **Shared git history** — all worktrees read from and write to the same `.git` directory in the main workspace. `git log`, `git fetch`, and `git push` work identically in any worktree.
 - **Rebasing before merge** — if `main` has advanced since the worktree was created (e.g. multiple features merging in parallel), rebase the feature branch before merging to avoid conflicts: `git rebase main` from within the worktree.

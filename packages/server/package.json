@@ -9,6 +9,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@google-cloud/bigquery": "^8.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

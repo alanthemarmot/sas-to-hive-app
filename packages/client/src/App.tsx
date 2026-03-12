@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { streamTranslation, executeHiveQuery } from './api/client';
+import { streamTranslation, executeBigQueryQuery } from './api/client';
 import ChatPanel from './components/ChatPanel';
 import Toolbar from './components/Toolbar';
 import TranslationView from './components/TranslationView';
@@ -121,24 +121,25 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'translated.hql';
+    a.download = 'translated.sql';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    addToast('success', 'Downloaded translated.hql');
+    addToast('success', 'Downloaded translated.sql');
   };
 
   const handleExecute = async () => {
     if (!hiveSQL) return;
+    setError(null);
     try {
-      const results = await executeHiveQuery(hiveSQL);
+      const results = await executeBigQueryQuery(hiveSQL);
       setHiveResults(results);
       setShowHiveResults(true);
       addToast('success', 'Query executed successfully');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hive execution failed');
-      addToast('error', err instanceof Error ? err.message : 'Hive execution failed');
+      setError(err instanceof Error ? err.message : 'BigQuery execution failed');
+      addToast('error', err instanceof Error ? err.message : 'BigQuery execution failed');
     }
   };
 
@@ -159,7 +160,7 @@ export default function App() {
           alt="Revenue"
           className="app-logo"
         />
-        <h1>SAS → HiveQL Translation Tool</h1>
+        <h1>SAS → BigQuery SQL Translation Tool</h1>
         <span className="app-subtitle">Revenue Commissioners</span>
       </header>
       <div className="app-body">
@@ -183,8 +184,10 @@ export default function App() {
             sasCode={sasCode}
             onSasCodeChange={setSasCode}
             hiveSQL={hiveSQL}
+            onHiveSQLChange={setHiveSQL}
             isTranslating={isTranslating}
             error={error}
+            onClearError={() => setError(null)}
           />
           {showExplanation && explanation && (
             <ExplanationPanel
