@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="../packages/client/public/favicon.svg" />
+  <title>SAS → HiveQL · Feature Demo Navigator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brandteal:   #005a5c;
+      --brandmint:   #428f94;
+      --cyan:        #00c6c6;
+      --blue:        #006fe6;
+      --green:       #155b25;
+      --red:         #a51d2b;
+      --yellow:      #ffc12c;
+      --surface-50:  #f4f4f4;
+      --surface-100: #f8f9fa;
+      --surface-200: #e9ecef;
+      --surface-300: #dee2e6;
+      --surface-600: #6c757d;
+      --surface-700: #485057;
+      --surface-800: #343a40;
+      --surface-900: #030507;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--surface-50);
+      color: var(--surface-800);
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────────────────── */
+    header {
+      background: var(--brandteal);
+      color: #fff;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 3px solid var(--cyan);
+    }
+    header svg { flex-shrink: 0; }
+    header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.01em; }
+    header p  { font-size: 0.8rem; opacity: 0.8; margin-top: 0.15rem; }
+    .header-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ── Toolbar strip ─────────────────────────────────────── */
+    .toolbar {
+      background: var(--brandmint);
+      color: #fff;
+      padding: 0.6rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .toolbar span { font-size: 0.78rem; opacity: 0.9; }
+    .btn-start-all {
+      margin-left: auto;
+      background: #fff;
+      color: var(--brandteal);
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: opacity 0.15s;
+    }
+    .btn-start-all:hover { opacity: 0.85; }
+
+    /* ── Layout ────────────────────────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 2rem 3rem;
+    }
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--surface-600);
+      margin-bottom: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── Feature card ──────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--surface-300);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .card:hover { box-shadow: 0 4px 16px rgba(0,90,92,0.1); border-color: var(--brandmint); }
+
+    .card-header {
+      padding: 0.9rem 1rem 0.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--surface-200);
+    }
+    .card-num {
+      background: var(--brandteal);
+      color: #fff;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .card-num.main {
+      background: var(--surface-700);
+      font-size: 0.55rem;
+      letter-spacing: -0.01em;
+    }
+    .card.card-main {
+      border-left: 3px solid var(--brandteal);
+    }
+    .card-title { font-size: 0.95rem; font-weight: 600; color: var(--surface-800); line-height: 1.3; }
+    .card-branch { font-size: 0.72rem; color: var(--surface-600); margin-top: 0.15rem; font-family: "Cascadia Code", "Fira Code", monospace; }
+
+    .card-body {
+      padding: 0.75rem 1rem;
+      flex: 1;
+    }
+    .card-desc { font-size: 0.82rem; color: var(--surface-700); line-height: 1.55; }
+
+    .card-footer {
+      padding: 0.65rem 1rem;
+      border-top: 1px solid var(--surface-200);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--surface-300);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .status-dot.up     { background: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.2); }
+    .status-dot.down   { background: #ef4444; }
+    .status-dot.checking { background: var(--yellow); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .status-text { font-size: 0.72rem; color: var(--surface-600); flex: 1; }
+
+    .port-badge {
+      font-size: 0.68rem;
+      font-family: "Cascadia Code", "Fira Code", monospace;
+      background: var(--surface-200);
+      color: var(--surface-700);
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+    }
+
+    .btn-open {
+      margin-left: auto;
+      background: var(--brandteal);
+      color: #fff;
+      border: none;
+      padding: 0.35rem 0.85rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: background 0.15s;
+    }
+    .btn-open:hover { background: var(--brandmint); }
+    .btn-open:disabled, .btn-open[aria-disabled="true"] {
+      background: var(--surface-300);
+      color: var(--surface-600);
+      pointer-events: none;
+    }
+
+    /* ── Info bar ──────────────────────────────────────────── */
+    .info-bar {
+      background: #e8f4f4;
+      border: 1px solid #b2d8d8;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      color: var(--brandteal);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+    .info-bar code {
+      background: rgba(0,90,92,0.08);
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-family: "Cascadia Code", "Fira Code", monospace;
+      font-size: 0.78rem;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--surface-600);
+      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--surface-200);
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <rect width="32" height="32" rx="6" fill="rgba(255,255,255,0.15)"/>
+    <path d="M7 10h6l3 12 3-8 2 8 3-12h-6" stroke="#00c6c6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M7 22h18" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="2 2"/>
+  </svg>
+  <div>
+    <h1>SAS → HiveQL Translation App</h1>
+    <p>Feature prototype demo navigator</p>
+  </div>
+  <span class="header-badge">7 Features</span>
+</header>
+
+<div class="toolbar">
+      <span>Start: <strong>npm run demo</strong> &nbsp;·&nbsp; Stop: <strong>npm run demo:stop</strong></span>
+  <button class="btn-start-all" onclick="checkAll()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="6" cy="6" r="5" stroke="#005a5c" stroke-width="1.5"/>
+      <path d="M4.5 4l3 2-3 2V4z" fill="#005a5c"/>
+    </svg>
+    Re-check all
+  </button>
+</div>
+
+<main>
+
+  <div class="info-bar">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0;margin-top:1px">
+      <circle cx="8" cy="8" r="7" stroke="#005a5c" stroke-width="1.4"/>
+      <path d="M8 7v4M8 5v.5" stroke="#005a5c" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span>Run <code>npm run demo</code> from the workspace root to start all 7 feature servers, then refresh this page. Each feature runs on its own port pair so they can all run simultaneously.</span>
+  </div>
+
+  <p class="section-label">Feature prototypes</p>
+
+  <div class="grid" id="card-grid">
+    <!-- Cards injected by JS -->
+  </div>
+
+</main>
+
+<footer>
+  SAS to HiveQL Translation App &nbsp;·&nbsp; POC &nbsp;·&nbsp; GitHub Models (gpt-4o-mini) &nbsp;·&nbsp; Revenue Design System v20
+</footer>
+
+<script>
+  const features = [
+    {
+      num: 0,
+      title: "Main App (trunk)",
+      branch: "main",
+      clientPort: 5173,
+      serverPort: 3001,
+      desc: "The baseline SAS \u2192 HiveQL translation app on the main branch. All feature branches are forked from this \u2014 use it as the reference during the demo."
+    },
+    {
+      num: 1,
+      title: "Conversational Follow-up",
+      branch: "feature/conversational-followup",
+      clientPort: 5181,
+      serverPort: 3011,
+      desc: "Chat panel that lets users ask follow-up questions about the translated HiveQL — refine output, explain choices, or request alternatives without re-running the full translation."
+    },
+    {
+      num: 2,
+      title: "Pattern Library",
+      branch: "feature/pattern-library",
+      clientPort: 5182,
+      serverPort: 3012,
+      desc: "Browsable catalogue of reusable SAS→Hive translation patterns (DATA step, PROC SQL, PROC SORT, macros). Click a pattern to insert it directly into the SAS editor."
+    },
+    {
+      num: 3,
+      title: "Confidence Scoring",
+      branch: "feature/confidence-scoring",
+      clientPort: 5183,
+      serverPort: 3013,
+      desc: "The translation engine annotates each output statement with a confidence level (high / medium / low) based on pattern complexity, flagging areas that need manual review."
+    },
+    {
+      num: 4,
+      title: "Line Mapping",
+      branch: "feature/line-mapping",
+      clientPort: 5184,
+      serverPort: 3014,
+      desc: "Click any line in the HiveQL output to highlight the corresponding SAS source lines — and vice versa. Powered by a mapping navigator sidebar for quick jumping."
+    },
+    {
+      num: 5,
+      title: "Dialect Selector",
+      branch: "feature/dialect-selector",
+      clientPort: 5185,
+      serverPort: 3015,
+      desc: "Choose a target SQL dialect from the toolbar (HiveQL, Spark SQL, Presto/Trino, BigQuery) before translating so the output targets your specific execution engine."
+    },
+    {
+      num: 6,
+      title: "Domain Context",
+      branch: "feature/domain-context",
+      clientPort: 5186,
+      serverPort: 3016,
+      desc: "Upload or select a domain context file (business glossary, table schemas, field aliases) so the LLM resolves domain-specific SAS variables to their correct Hive equivalents."
+    },
+    {
+      num: 7,
+      title: "View Mode Switcher",
+      branch: "feature/view-modes",
+      clientPort: 5187,
+      serverPort: 3017,
+      desc: "Switch between side-by-side, diff view, and focused (single-pane) modes. Diff view highlights exactly what changed between SAS and HiveQL at the token level."
+    }
+  ];
+
+  function buildCard(f) {
+    const isMain = f.num === 0;
+    const numLabel = isMain ? 'main' : f.num;
+    return `
+      <article class="card${isMain ? ' card-main' : ''}" id="card-${f.num}">
+        <div class="card-header">
+          <div class="card-num${isMain ? ' main' : ''}">${isMain ? '✦' : f.num}</div>
+          <div>
+            <div class="card-title">${f.title}</div>
+            <div class="card-branch">${f.branch}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-desc">${f.desc}</p>
+        </div>
+        <div class="card-footer">
+          <div class="status-dot checking" id="dot-${f.num}" aria-hidden="true"></div>
+          <span class="status-text" id="status-${f.num}">Checking…</span>
+          <span class="port-badge">:${f.clientPort}</span>
+          <a href="http://localhost:${f.clientPort}"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="btn-open"
+             id="btn-${f.num}"
+             aria-label="Open feature ${f.num} in new tab">
+            Open
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+              <path d="M2 8L8 2M5 2h3v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </article>`;
+  }
+
+  async function checkServer(f) {
+    const dot    = document.getElementById(`dot-${f.num}`);
+    const status = document.getElementById(`status-${f.num}`);
+    const btn    = document.getElementById(`btn-${f.num}`);
+    try {
+      const res = await fetch(`http://localhost:${f.serverPort}/api/health`, {
+        signal: AbortSignal.timeout(2500)
+      });
+      if (res.ok) {
+        dot.className = 'status-dot up';
+        status.textContent = 'Server running';
+        btn.removeAttribute('aria-disabled');
+      } else {
+        dot.className = 'status-dot down';
+        status.textContent = `Server error (${res.status})`;
+        btn.setAttribute('aria-disabled', 'true');
+      }
+    } catch {
+      dot.className = 'status-dot down';
+      status.textContent = 'Not running';
+      btn.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  function checkAll() {
+    // Reset all to checking state first
+    features.forEach(f => {
+      const dot    = document.getElementById(`dot-${f.num}`);
+      const status = document.getElementById(`status-${f.num}`);
+      if (dot) { dot.className = 'status-dot checking'; }
+      if (status) { status.textContent = 'Checking…'; }
+    });
+    features.forEach(f => checkServer(f));
+  }
+
+  // Build cards
+  document.getElementById('card-grid').innerHTML = features.map(buildCard).join('');
+
+  // Initial health check
+  checkAll();
+
+  // Auto-refresh health every 10 seconds
+  setInterval(checkAll, 10000);
+</script>
+
+</body>
+</html>

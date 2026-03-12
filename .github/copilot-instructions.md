@@ -10,15 +10,15 @@ The authoritative plan for this project — including completed features, curren
 
 ### Feature Index
 
-| # | Feature | Plan file | Branch | Worktree | Ports (server/client) |
-|---|---------|-----------|--------|----------|-----------------------|
-| 1 | Conversational follow-up | `plan-feature-1-conversational-followup.prompt.md` | `feature/conversational-followup` | `.trees/feat-1` | 3011 / 5181 |
-| 2 | Pattern library | `plan-feature-2-pattern-library.prompt.md` | `feature/pattern-library` | `.trees/feat-2` | 3012 / 5182 |
-| 3 | Confidence scoring | `plan-feature-3-confidence-scoring.prompt.md` | `feature/confidence-scoring` | `.trees/feat-3` | 3013 / 5183 |
-| 4 | Line mapping | `plan-feature-4-line-mapping.prompt.md` | `feature/line-mapping` | `.trees/feat-4` | 3014 / 5184 |
-| 5 | Dialect selector | `plan-feature-5-dialect-selector.prompt.md` | `feature/dialect-selector` | `.trees/feat-5` | 3015 / 5185 |
-| 6 | Domain context | `plan-feature-6-domain-context.prompt.md` | `feature/domain-context` | `.trees/feat-6` | 3016 / 5186 |
-| 7 | View mode switcher | `plan-feature-7-view-modes.prompt.md` | `feature/view-modes` | `.trees/feat-7` | 3017 / 5187 |
+| # | Feature | Plan file | Branch | Worktree | Ports (server/client) | Status |
+|---|---------|-----------|--------|----------|-----------------------|--------|
+| 1 | Conversational follow-up | `plan-feature-1-conversational-followup.prompt.md` | `feature/conversational-followup` | `.trees/feat-1` | 3011 / 5181 | ✅ Built |
+| 2 | Pattern library | `plan-feature-2-pattern-library.prompt.md` | `feature/pattern-library` | `.trees/feat-2` | 3012 / 5182 | ✅ Built |
+| 3 | Confidence scoring | `plan-feature-3-confidence-scoring.prompt.md` | `feature/confidence-scoring` | `.trees/feat-3` | 3013 / 5183 | ✅ Built |
+| 4 | Line mapping | `plan-feature-4-line-mapping.prompt.md` | `feature/line-mapping` | `.trees/feat-4` | 3014 / 5184 | ✅ Built |
+| 5 | Dialect selector | `plan-feature-5-dialect-selector.prompt.md` | `feature/dialect-selector` | `.trees/feat-5` | 3015 / 5185 | ✅ Built |
+| 6 | Domain context | `plan-feature-6-domain-context.prompt.md` | `feature/domain-context` | `.trees/feat-6` | 3016 / 5186 | ✅ Built |
+| 7 | View mode switcher | `plan-feature-7-view-modes.prompt.md` | `feature/view-modes` | `.trees/feat-7` | 3017 / 5187 | ✅ Built |
 
 ---
 

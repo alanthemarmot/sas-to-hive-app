@@ -99,6 +99,43 @@ kill -9 <PID>
 3. Click "Translate" to convert to Hive SQL
 4. View the results in the Monaco editors
 
+## Feature Demo (All 7 Feature Prototypes)
+
+All seven feature branches are implemented as standalone prototypes in `.trees/feat-1` through `.trees/feat-7`, each running on its own dedicated port pair.
+
+### Start Everything at Once
+
+```bash
+npm run demo
+```
+
+This starts all 8 servers (main app + 7 features) using `concurrently` and opens the **demo navigator** (`demo/index.html`) in your browser. The navigator shows a live-status card for each feature — a green dot means the server is up.
+
+### Stop All Demo Servers
+
+```bash
+npm run demo:stop
+```
+
+### Re-open the Demo Navigator (without restarting)
+
+```bash
+npm run demo:open
+```
+
+### Feature Ports Reference
+
+| Feature | Client | Server |
+|---------|--------|--------|
+| Main app (trunk) | 5173 | 3001 |
+| 1 · Conversational follow-up | 5181 | 3011 |
+| 2 · Pattern library | 5182 | 3012 |
+| 3 · Confidence scoring | 5183 | 3013 |
+| 4 · Line mapping | 5184 | 3014 |
+| 5 · Dialect selector | 5185 | 3015 |
+| 6 · Domain context | 5186 | 3016 |
+| 7 · View mode switcher | 5187 | 3017 |
+
 ## Common Commands
 
 ### Check for TypeScript Errors (Server)
