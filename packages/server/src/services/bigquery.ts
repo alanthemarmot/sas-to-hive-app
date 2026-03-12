@@ -35,17 +35,35 @@ function toJsonSafe(val: unknown): unknown {
  *  - Auto-appends LIMIT 1000 when no LIMIT clause is present
  *  - Dry-run cost check: rejects queries that would scan more than 1 GB
  */
+/** Strip SQL line and block comments from the start of a query before safety checks. */
+function stripLeadingComments(sql: string): string {
+  return sql
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/--[^\n]*(\n|$)/g, '')
+    .trim();
+}
+
 export async function executeBigQuery(sql: string): Promise<BigQueryResult> {
   const project = process.env.GOOGLE_CLOUD_PROJECT!;
   const dataset = process.env.BIGQUERY_DATASET ?? 'sas_migration_samples';
 
-  if (MUTATION_PATTERN.test(sql.trim())) {
+  if (MUTATION_PATTERN.test(stripLeadingComments(sql))) {
     throw new Error(
       'Mutating statements (DROP, ALTER, DELETE, TRUNCATE, INSERT, UPDATE, CREATE, MERGE) are not permitted.',
     );
   }
 
-  const query = HAS_LIMIT.test(sql) ? sql : `${sql.trimEnd()}\nLIMIT ${AUTO_LIMIT}`;
+  // Strip trailing comments, semicolons, and whitespace before appending LIMIT
+  // so that "ORDER BY x; -- comment\nLIMIT 1000" doesn't produce invalid syntax.
+  const cleanedSql = sql
+    .replace(/\/\*[\s\S]*?\*\//g, '')   // block comments
+    .replace(/--[^\n]*(\n|$)/g, '\n')   // line comments
+    .trim()
+    .replace(/;+\s*$/, '');             // trailing semicolons
+
+  const query = HAS_LIMIT.test(cleanedSql)
+    ? cleanedSql
+    : `${cleanedSql}\nLIMIT ${AUTO_LIMIT}`;
 
   const bigquery = new BigQuery({ projectId: project });
 

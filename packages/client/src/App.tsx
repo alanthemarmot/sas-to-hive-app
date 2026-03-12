@@ -128,6 +128,7 @@ export default function App() {
 
   const handleExecute = async () => {
     if (!hiveSQL) return;
+    setError(null);
     try {
       const results = await executeBigQueryQuery(hiveSQL);
       setHiveResults(results);
@@ -179,8 +180,10 @@ export default function App() {
             sasCode={sasCode}
             onSasCodeChange={setSasCode}
             hiveSQL={hiveSQL}
+            onHiveSQLChange={setHiveSQL}
             isTranslating={isTranslating}
             error={error}
+            onClearError={() => setError(null)}
           />
           {showExplanation && explanation && (
             <ExplanationPanel

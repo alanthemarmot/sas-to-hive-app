@@ -29,11 +29,17 @@ router.post('/execute', async (req: Request, res: Response) => {
     // Mock fallback — used when GOOGLE_CLOUD_PROJECT is not set
     res.set('X-Mock-Response', 'true');
 
-    const trimmedQuery = query.trim().toUpperCase();
+    // Strip leading SQL comments before detecting query type so that
+    // comment-prefixed queries (e.g. "-- [SAS: ...] \n WITH base AS ...") route correctly.
+    const stripped = query
+      .replace(/\/\*[\s\S]*?\*\//g, '')   // block comments
+      .replace(/--[^\n]*(\n|$)/g, '')       // line comments
+      .trim();
+    const queryType = stripped.toUpperCase();
     const delay = 200 + Math.floor(Math.random() * 300);
     await new Promise((resolve) => setTimeout(resolve, delay));
 
-    if (trimmedQuery.startsWith('SELECT')) {
+    if (queryType.startsWith('SELECT') || queryType.startsWith('WITH')) {
       const columns = ['id', 'name', 'region', 'amount', 'created_date'];
       const rows = [
         [1, 'Alpha Corp', 'EAST', 15230.50, '2024-01-15'],
@@ -48,9 +54,9 @@ router.post('/execute', async (req: Request, res: Response) => {
         rowCount: rows.length,
         message: `[MOCK] Query executed successfully. ${rows.length} rows returned. (${delay}ms)`,
       });
-    } else if (trimmedQuery.startsWith('CREATE')) {
+    } else if (queryType.startsWith('CREATE')) {
       res.json({ columns: [], rows: [], rowCount: 0, message: `[MOCK] Table created successfully. (${delay}ms)` });
-    } else if (trimmedQuery.startsWith('INSERT')) {
+    } else if (queryType.startsWith('INSERT')) {
       res.json({ columns: [], rows: [], rowCount: 0, message: `[MOCK] Insert completed. Rows affected: 5. (${delay}ms)` });
     } else {
       res.json({ columns: [], rows: [], rowCount: 0, message: `[MOCK] Statement executed successfully. (${delay}ms)` });
