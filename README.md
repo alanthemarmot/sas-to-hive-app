@@ -64,18 +64,102 @@ sas-to-hive-app/
     └── prompts/         # Feature plans (see below)
 ```
 
-## Planned Features
+## Feature Prototypes
 
-Six features are specced and ready for implementation, each in its own git worktree on a separate branch. See [`.github/prompts/plan-sasToHiveApp.prompt.md`](.github/prompts/plan-sasToHiveApp.prompt.md) for the worktree workflow.
+Seven features have been built as standalone prototypes, each in its own git worktree on a dedicated port pair. All are demo-ready and can run simultaneously. See [`.github/prompts/plan-sasToHiveApp.prompt.md`](.github/prompts/plan-sasToHiveApp.prompt.md) for the worktree workflow.
 
-| # | Feature | Plan |
-|---|---------|------|
-| 1 | Conversational follow-up — ask questions about a translation | [plan-feature-1](/.github/prompts/plan-feature-1-conversational-followup.prompt.md) |
-| 2 | SAS pattern library / Rosetta Stone reference | [plan-feature-2](/.github/prompts/plan-feature-2-pattern-library.prompt.md) |
-| 3 | Translation confidence scoring & validation warnings | [plan-feature-3](/.github/prompts/plan-feature-3-confidence-scoring.prompt.md) |
-| 4 | Line-by-line "What Changed?" mapping panel | [plan-feature-4](/.github/prompts/plan-feature-4-line-mapping.prompt.md) |
-| 5 | Target dialect selector (Hive / BigQuery / Spark SQL) | [plan-feature-5](/.github/prompts/plan-feature-5-dialect-selector.prompt.md) |
-| 6 | Domain context files (tax-area schema & business rules) | [plan-feature-6](/.github/prompts/plan-feature-6-domain-context.prompt.md) |
+| # | Feature | Status | Plan |
+|---|---------|--------|------|
+| 1 | Conversational follow-up — ask questions about a translation | ✅ Demo-ready | [plan-feature-1](/.github/prompts/plan-feature-1-conversational-followup.prompt.md) |
+| 2 | SAS pattern library / Rosetta Stone reference | ✅ Demo-ready | [plan-feature-2](/.github/prompts/plan-feature-2-pattern-library.prompt.md) |
+| 3 | Translation confidence scoring & validation warnings | ✅ Demo-ready | [plan-feature-3](/.github/prompts/plan-feature-3-confidence-scoring.prompt.md) |
+| 4 | Line-by-line "What Changed?" mapping panel | ✅ Demo-ready | [plan-feature-4](/.github/prompts/plan-feature-4-line-mapping.prompt.md) |
+| 5 | Target dialect selector (Hive / BigQuery / Spark SQL) | ✅ Demo-ready | [plan-feature-5](/.github/prompts/plan-feature-5-dialect-selector.prompt.md) |
+| 6 | Domain context files (tax-area schema & business rules) | ✅ Demo-ready | [plan-feature-6](/.github/prompts/plan-feature-6-domain-context.prompt.md) |
+| 7 | View mode switcher (side-by-side / diff / unified) | ✅ Demo-ready | [plan-feature-7](/.github/prompts/plan-feature-7-view-modes.prompt.md) |
+
+Run all prototypes simultaneously with:
+
+```bash
+npm run demo          # starts all 8 servers (main + 7 features) + opens demo/index.html
+npm run demo:stop     # stops all demo server processes
+npm run demo:open     # re-opens demo/index.html without restarting servers
+```
+
+## Next Steps
+
+The prototype phase is complete. The following steps are required to move from prototype to production.
+
+### 1. Merge Feature Branches into Main
+
+Each feature prototype lives on its own branch and needs review before being merged. Merge in order of dependency, squash-committing for a clean history:
+
+```bash
+git merge --squash feature/conversational-followup
+git merge --squash feature/pattern-library
+git merge --squash feature/confidence-scoring
+git merge --squash feature/line-mapping
+git merge --squash feature/dialect-selector
+git merge --squash feature/domain-context
+git merge --squash feature/view-modes
+```
+
+### 2. Production Deployment (GCP)
+
+Target architecture:
+
+| Component | Technology |
+|-----------|-----------|
+| Frontend | Cloud Run (containerised Vite build with nginx) |
+| Backend | Cloud Run (Express + Node.js) |
+| Database | Cloud SQL for PostgreSQL (metadata / user data) |
+| Hive execution | Dataproc (Hive on GCP) |
+| Secrets | Secret Manager for `GITHUB_PAT` and DB credentials |
+| File storage | Cloud Storage (replace in-memory upload store) |
+
+### 3. Real Hive Execution
+
+Replace the mock in `packages/server/src/routes/hive.ts` with an actual Dataproc JDBC connection. Add environment variables:
+
+```
+HIVE_JDBC_URL=jdbc:hive2://dataproc-cluster:10000/default
+HIVE_USERNAME=hive
+HIVE_PRINCIPAL=hive/_HOST@REALM   # for Kerberos
+```
+
+Safety constraints: block `DROP`/`ALTER`/`DELETE` statements, cap results at 1,000 rows, enforce a 30-second execution timeout, and audit-log all queries.
+
+### 4. Persistent File Storage
+
+Replace the in-memory mock (`services/mock-files.ts`) with Cloud Storage-backed file management so uploaded `.sas` files survive server restarts and are accessible per user.
+
+### 5. User Authentication
+
+Add Identity Platform (OIDC / OAuth 2.0) with session management. Protect all routes with an auth middleware. Store user records in Cloud SQL.
+
+### 6. Translation History Database
+
+Persist each translation in Cloud SQL so users can retrieve and compare past results:
+
+```sql
+CREATE TABLE translations (
+  id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  sas_code TEXT NOT NULL,
+  hive_sql TEXT NOT NULL,
+  model VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  execution_status VARCHAR(20)
+);
+```
+
+### 7. Rate Limiting & Quota Management
+
+Add rate limiting on the translation endpoint to stay within GitHub Models API quota. Track per-user usage and surface warnings when approaching limits.
+
+### 8. CI/CD Pipeline
+
+Set up GitHub Actions to run type-checks (`tsc --noEmit`), lint, build Docker images, and deploy to Cloud Run on merge to `main`.
 
 ## Environment Variables
 
